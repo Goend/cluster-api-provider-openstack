@@ -60,6 +60,17 @@ func (s *Service) GetPortFromInstanceIP(instanceID string, ip string) ([]ports.P
 	return s.client.ListPort(portOpts)
 }
 
+// ListInstancePorts returns ports attached to the instance, optionally filtered by network ID.
+func (s *Service) ListInstancePorts(instanceID string, networkID string) ([]ports.Port, error) {
+	portOpts := ports.ListOpts{
+		DeviceID: instanceID,
+	}
+	if networkID != "" {
+		portOpts.NetworkID = networkID
+	}
+	return s.client.ListPort(portOpts)
+}
+
 type PortListOpts struct {
 	DeviceOwner []string `q:"device_owner"`
 	NetworkID   string   `q:"network_id"`
@@ -260,6 +271,59 @@ func (s *Service) EnsurePort(eventObject runtime.Object, portSpec *infrav1.Resol
 	record.Eventf(eventObject, "SuccessfulCreatePort", "Created port %s with id %s", port.Name, port.ID)
 
 	return port, nil
+}
+
+// EnsureAllowedAddressPairs ensures the port has the desired address pairs without removing existing ones.
+func (s *Service) EnsureAllowedAddressPairs(port *ports.Port, desired []infrav1.AddressPair) (bool, error) {
+	if port == nil || len(desired) == 0 {
+		return false, nil
+	}
+
+	known := make(map[string]ports.AddressPair, len(port.AllowedAddressPairs))
+	ordered := make([]ports.AddressPair, 0, len(port.AllowedAddressPairs)+len(desired))
+	for _, existing := range port.AllowedAddressPairs {
+		if existing.IPAddress == "" {
+			continue
+		}
+		if _, found := known[existing.IPAddress]; found {
+			continue
+		}
+		known[existing.IPAddress] = existing
+		ordered = append(ordered, existing)
+	}
+
+	changed := false
+	for _, desiredPair := range desired {
+		if desiredPair.IPAddress == "" {
+			continue
+		}
+		if _, found := known[desiredPair.IPAddress]; found {
+			continue
+		}
+		mac := ""
+		if desiredPair.MACAddress != nil {
+			mac = *desiredPair.MACAddress
+		}
+		newPair := ports.AddressPair{
+			IPAddress:  desiredPair.IPAddress,
+			MACAddress: mac,
+		}
+		known[desiredPair.IPAddress] = newPair
+		ordered = append(ordered, newPair)
+		changed = true
+	}
+
+	if !changed {
+		return false, nil
+	}
+
+	_, err := s.client.UpdatePort(port.ID, ports.UpdateOpts{
+		AllowedAddressPairs: &ordered,
+	})
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func getPortProfile(p *infrav1.BindingProfile) map[string]interface{} {

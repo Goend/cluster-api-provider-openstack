@@ -28,6 +28,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/dynamic"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	cliflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/logs"
@@ -320,6 +321,11 @@ func setupChecks(mgr ctrl.Manager) {
 
 func setupReconcilers(ctx context.Context, mgr ctrl.Manager, caCerts []byte) {
 	scopeFactory := scope.NewFactory(scopeCacheMaxSize)
+	dynamicClient, err := dynamic.NewForConfig(mgr.GetConfig())
+	if err != nil {
+		setupLog.Error(err, "unable to create dynamic client")
+		os.Exit(1)
+	}
 
 	crdMigratorConfig := map[client.Object]crdmigrator.ByObjectConfig{
 		&infrav1.OpenStackCluster{}: {
@@ -360,6 +366,7 @@ func setupReconcilers(ctx context.Context, mgr ctrl.Manager, caCerts []byte) {
 
 	if err := (&controllers.OpenStackClusterReconciler{
 		Client:           mgr.GetClient(),
+		DynamicClient:    dynamicClient,
 		Recorder:         mgr.GetEventRecorderFor("openstackcluster-controller"),
 		WatchFilterValue: watchFilterValue,
 		ScopeFactory:     scopeFactory,

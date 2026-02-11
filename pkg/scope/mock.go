@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/go-logr/logr"
+	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 	"go.uber.org/mock/gomock"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -91,10 +92,26 @@ func (f *MockScopeFactory) NewLbClient() (clients.LbClient, error) {
 	return f.LbClient, nil
 }
 
+func (f *MockScopeFactory) NewIdentityClient() (*gophercloud.ServiceClient, error) {
+	return nil, ErrIdentityClientUnavailable
+}
+
 func (f *MockScopeFactory) ProjectID() string {
 	return f.projectID
 }
 
 func (f *MockScopeFactory) ExtractToken() (*tokens.Token, error) {
 	return &tokens.Token{ExpiresAt: time.Now().Add(24 * time.Hour)}, nil
+}
+
+func (f *MockScopeFactory) AuthResult() gophercloud.AuthResult {
+	return nil
+}
+
+func (f *MockScopeFactory) IdentityEndpoint() string {
+	return ""
+}
+
+func (f *MockScopeFactory) RegionName() string {
+	return ""
 }

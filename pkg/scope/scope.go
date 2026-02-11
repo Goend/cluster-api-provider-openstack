@@ -18,8 +18,10 @@ package scope
 
 import (
 	"context"
+	"errors"
 
 	"github.com/go-logr/logr"
+	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 	"k8s.io/apimachinery/pkg/util/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -52,9 +54,17 @@ type Scope interface {
 	NewImageClient() (clients.ImageClient, error)
 	NewNetworkClient() (clients.NetworkClient, error)
 	NewLbClient() (clients.LbClient, error)
+	NewIdentityClient() (*gophercloud.ServiceClient, error)
+	ServiceEndpoint(service string) (string, error)
 	ProjectID() string
 	ExtractToken() (*tokens.Token, error)
+	AuthResult() gophercloud.AuthResult
+	IdentityEndpoint() string
+	RegionName() string
 }
+
+// ErrIdentityClientUnavailable indicates a scope cannot provide an identity client.
+var ErrIdentityClientUnavailable = errors.New("identity client unavailable")
 
 // WithLogger extends Scope with a logger.
 type WithLogger struct {

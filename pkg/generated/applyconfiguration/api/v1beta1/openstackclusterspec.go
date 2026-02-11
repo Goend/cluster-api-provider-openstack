@@ -25,27 +25,28 @@ import (
 // OpenStackClusterSpecApplyConfiguration represents a declarative configuration of the OpenStackClusterSpec type for use
 // with apply.
 type OpenStackClusterSpecApplyConfiguration struct {
-	ManagedSubnets                   []SubnetSpecApplyConfiguration                `json:"managedSubnets,omitempty"`
-	Router                           *RouterParamApplyConfiguration                `json:"router,omitempty"`
-	Network                          *NetworkParamApplyConfiguration               `json:"network,omitempty"`
-	Subnets                          []SubnetParamApplyConfiguration               `json:"subnets,omitempty"`
-	NetworkMTU                       *int                                          `json:"networkMTU,omitempty"`
-	ExternalRouterIPs                []ExternalRouterIPParamApplyConfiguration     `json:"externalRouterIPs,omitempty"`
-	ExternalNetwork                  *NetworkParamApplyConfiguration               `json:"externalNetwork,omitempty"`
-	DisableExternalNetwork           *bool                                         `json:"disableExternalNetwork,omitempty"`
-	APIServerLoadBalancer            *APIServerLoadBalancerApplyConfiguration      `json:"apiServerLoadBalancer,omitempty"`
-	DisableAPIServerFloatingIP       *bool                                         `json:"disableAPIServerFloatingIP,omitempty"`
-	APIServerFloatingIP              *string                                       `json:"apiServerFloatingIP,omitempty"`
-	APIServerFixedIP                 *string                                       `json:"apiServerFixedIP,omitempty"`
-	APIServerPort                    *uint16                                       `json:"apiServerPort,omitempty"`
-	ManagedSecurityGroups            *ManagedSecurityGroupsApplyConfiguration      `json:"managedSecurityGroups,omitempty"`
-	DisablePortSecurity              *bool                                         `json:"disablePortSecurity,omitempty"`
-	Tags                             []string                                      `json:"tags,omitempty"`
-	ControlPlaneEndpoint             *corev1beta1.APIEndpoint                      `json:"controlPlaneEndpoint,omitempty"`
-	ControlPlaneAvailabilityZones    []string                                      `json:"controlPlaneAvailabilityZones,omitempty"`
-	ControlPlaneOmitAvailabilityZone *bool                                         `json:"controlPlaneOmitAvailabilityZone,omitempty"`
-	Bastion                          *BastionApplyConfiguration                    `json:"bastion,omitempty"`
-	IdentityRef                      *OpenStackIdentityReferenceApplyConfiguration `json:"identityRef,omitempty"`
+	ManagedSubnets                   []SubnetSpecApplyConfiguration                    `json:"managedSubnets,omitempty"`
+	Router                           *RouterParamApplyConfiguration                    `json:"router,omitempty"`
+	Network                          *NetworkParamApplyConfiguration                   `json:"network,omitempty"`
+	Subnets                          []SubnetParamApplyConfiguration                   `json:"subnets,omitempty"`
+	NetworkMTU                       *int                                              `json:"networkMTU,omitempty"`
+	ExternalRouterIPs                []ExternalRouterIPParamApplyConfiguration         `json:"externalRouterIPs,omitempty"`
+	ExternalNetwork                  *NetworkParamApplyConfiguration                   `json:"externalNetwork,omitempty"`
+	DisableExternalNetwork           *bool                                             `json:"disableExternalNetwork,omitempty"`
+	APIServerLoadBalancer            *APIServerLoadBalancerApplyConfiguration          `json:"apiServerLoadBalancer,omitempty"`
+	DisableAPIServerFloatingIP       *bool                                             `json:"disableAPIServerFloatingIP,omitempty"`
+	APIServerFloatingIP              *string                                           `json:"apiServerFloatingIP,omitempty"`
+	APIServerFixedIP                 *string                                           `json:"apiServerFixedIP,omitempty"`
+	APIServerPort                    *uint16                                           `json:"apiServerPort,omitempty"`
+	ManagedSecurityGroups            *ManagedSecurityGroupsApplyConfiguration          `json:"managedSecurityGroups,omitempty"`
+	DisablePortSecurity              *bool                                             `json:"disablePortSecurity,omitempty"`
+	Tags                             []string                                          `json:"tags,omitempty"`
+	ControlPlaneEndpoint             *corev1beta1.APIEndpoint                          `json:"controlPlaneEndpoint,omitempty"`
+	ControlPlaneAvailabilityZones    []string                                          `json:"controlPlaneAvailabilityZones,omitempty"`
+	ControlPlaneOmitAvailabilityZone *bool                                             `json:"controlPlaneOmitAvailabilityZone,omitempty"`
+	Bastion                          *BastionApplyConfiguration                        `json:"bastion,omitempty"`
+	IdentityRef                      *OpenStackIdentityReferenceApplyConfiguration     `json:"identityRef,omitempty"`
+	Extensions                       *OpenStackClusterExtensionsSpecApplyConfiguration `json:"extensions,omitempty"`
 }
 
 // OpenStackClusterSpecApplyConfiguration constructs a declarative configuration of the OpenStackClusterSpec type for use with
@@ -238,5 +239,13 @@ func (b *OpenStackClusterSpecApplyConfiguration) WithBastion(value *BastionApply
 // If called multiple times, the IdentityRef field is set to the value of the last call.
 func (b *OpenStackClusterSpecApplyConfiguration) WithIdentityRef(value *OpenStackIdentityReferenceApplyConfiguration) *OpenStackClusterSpecApplyConfiguration {
 	b.IdentityRef = value
+	return b
+}
+
+// WithExtensions sets the Extensions field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Extensions field is set to the value of the last call.
+func (b *OpenStackClusterSpecApplyConfiguration) WithExtensions(value *OpenStackClusterExtensionsSpecApplyConfiguration) *OpenStackClusterSpecApplyConfiguration {
+	b.Extensions = value
 	return b
 }

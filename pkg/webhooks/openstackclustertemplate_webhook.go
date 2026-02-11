@@ -52,6 +52,8 @@ func (*openStackClusterTemplateWebhook) ValidateCreate(_ context.Context, objRaw
 		return nil, err
 	}
 
+	allErrs = append(allErrs, validateNetworkingExtensions(&newObj.Spec.Template.Spec, field.NewPath("spec", "template", "spec"))...)
+
 	return aggregateObjErrors(newObj.GroupVersionKind().GroupKind(), newObj.Name, allErrs)
 }
 

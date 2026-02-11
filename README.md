@@ -33,6 +33,53 @@ previous cluster managers such as [kops][kops] and
 - Support for security groups
 - cloud-init based nodes bootstrapping
 
+## Current Extension Goal (BA/ACP + OpenStack Infra)
+
+参考 `cluster-api/bootstrap/ansible/README.md` 中的 BA 架构，我们在 CAPO 中的最新目标是补齐 Ansible Bootstrap（BA）与 Ansible Control Plane（ACP）工作流所需的 OpenStack 基础设施能力，使其能够端到端运行：
+
+- **复用当前仓库**：直接在 CAPO 内提供 BA/ACP 所消费的 infra vars、Secret 等数据面，而不是再 Fork 一个几乎相同的代码库。
+- **最小侵入点**：在不改变 Cluster API 既有 Contract/CRD 的前提下，把 OpenStack 逻辑封装在 provider 内部，通过现有接口为 BA/ACP 提供 inventory、vars、SSH 凭据等。
+- **交付完整链路**：实现 BA/ACP 依赖的 OpenStack 基础设施控制器，实现集群引导、扩缩容、升级等流程在 Ansible 工作流下可用。
+
+### 基础设施 Provider 调谐重点
+
+| README 字段 | Infra 类型 | 建议 Extensions 路径 | 数据来源/写入方 | 消费方及用途 |
+|-------------|------------|---------------------|-----------------|--------------|
+| `kube_network_plugin` | Cluster | `spec.extensions.networking.kubeNetworkPlugin` | 用户/ClusterClass | BA/ACP 渲染 vars，决定使用 cilium/flannel 等 |
+| `cilium_openstack_project_id` | Cluster | `status.extensions.networking.cilium.projectID` | CAPO | BA/ACP 配置 Cilium 与 OpenStack 集成 |
+| `cilium_openstack_default_subnet_id` | Cluster | `status.extensions.networking.cilium.defaultSubnetID` | CAPO | BA/ACP 提供给 VPC CNI |
+| `cilium_openstack_security_group_ids` | Cluster | `status.extensions.networking.cilium.securityGroupIDs[]` | CAPO | BA/ACP 配置 Pod/节点安全组 |
+| `vpc_cni_webhook_enable` | Cluster | `status.extensions.networking.cilium.webhookEnable` | CAPO | BA 控制是否部署相关 webhook |
+| `master_virtual_vip` | Cluster | `status.extensions.loadBalancers.controlPlane.vip` | CAPO（API Server LB/VIP） | BA Inventory/vars |
+| `ingress_virtual_vip` | Cluster | `status.extensions.loadBalancers.ingress.vip` | CAPO（Ingress LB） | BA/Harbor |
+| `keepalived_interface` | Machine | `spec.extensions.networkInterfaces.keepalived` | 用户/ClusterClass | BA 设置 keepalived |
+| `harbor_addr` | Cluster | `status.extensions.loadBalancers.ingress.vip` | CAPO/业务配置 | BA 渲染 Harbor 入口 |
+| `cloud_master_vip` | Cluster | `status.extensions.openStack.mgmt` | CAPO | BA/外部访问 |
+| `openstack_auth_domain` | Cluster | `status.extensions.openStack.keystone` | CAPO（从 IdentityRef 解出只读 endpoint） | BA vars；凭证仍通过 SecretRef |
+| `openstack_cinder_domain` | Cluster | `status.extensions.openStack.cinder` | CAPO | BA/存储插件 |
+| `openstack_nova_domain` | Cluster | `status.extensions.openStack.nova` | CAPO | BA/Cloud provider 配置 |
+| `openstack_neutron_domain` | Cluster | `status.extensions.openStack.neutron` | CAPO | BA/网络插件 |
+| `openstack_project_name` | Cluster | `status.extensions.openStack.project` | CAPO | BA vars |
+| `openstack_project_domain_name` | Cluster | `status.extensions.openStack.projectDomain` | CAPO | BA vars |
+| `openstack_region_name` | Cluster | `status.extensions.openStack.region` | CAPO | BA vars |
+| `ntp_server` | Cluster | `status.extensions.platform.ntp.server` | CAPO（基础设施/跳板配置） | BA hosts/vars |
+| `vip_mgmt` | Cluster | `status.extensions.platform.management.vip` | CAPO（跳板机） | BA/运维脚本 |
+| `flannel_interface` | Cluster | `spec.extensions.networkInterfaces.flannel` | 用户/ClusterClass（集群唯一配置） | BA vars |
+| `node_resources.<machine name>` | Machine | `status.extensions.nodeResources[machine].reserved` | CAPO（根据 flavor/策略） | BA 生成 `node_resources` 字段 |
+
+### Extensions 渲染流程
+
+```mermaid
+flowchart LR
+    ClusterCtrl[OpenStackClusterReconciler] --> ExtCluster[reconcileClusterExtensions]
+    ExtCluster --> LBStatus[Status.Extensions.LoadBalancers]
+    MachineCtrl[OpenStackMachineReconciler] --> ExtMachine[reconcileMachineExtensions]
+    ExtMachine --> MachineStatus[Status.Extensions]
+```
+
+> 入口位于 `api/v1beta1/extensions_types.go` 与 `controllers/extensions_reconcile.go`，方便后续在扩展逻辑更完整时与社区主干代码解耦。
+
+
 ------
 
 ## Compatibility with Cluster API

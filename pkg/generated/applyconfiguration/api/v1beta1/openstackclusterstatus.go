@@ -26,20 +26,21 @@ import (
 // OpenStackClusterStatusApplyConfiguration represents a declarative configuration of the OpenStackClusterStatus type for use
 // with apply.
 type OpenStackClusterStatusApplyConfiguration struct {
-	Ready                     *bool                                       `json:"ready,omitempty"`
-	Initialization            *ClusterInitializationApplyConfiguration    `json:"initialization,omitempty"`
-	Network                   *NetworkStatusWithSubnetsApplyConfiguration `json:"network,omitempty"`
-	ExternalNetwork           *NetworkStatusApplyConfiguration            `json:"externalNetwork,omitempty"`
-	Router                    *RouterApplyConfiguration                   `json:"router,omitempty"`
-	APIServerLoadBalancer     *LoadBalancerApplyConfiguration             `json:"apiServerLoadBalancer,omitempty"`
-	FailureDomains            *corev1beta1.FailureDomains                 `json:"failureDomains,omitempty"`
-	ControlPlaneSecurityGroup *SecurityGroupStatusApplyConfiguration      `json:"controlPlaneSecurityGroup,omitempty"`
-	WorkerSecurityGroup       *SecurityGroupStatusApplyConfiguration      `json:"workerSecurityGroup,omitempty"`
-	BastionSecurityGroup      *SecurityGroupStatusApplyConfiguration      `json:"bastionSecurityGroup,omitempty"`
-	Bastion                   *BastionStatusApplyConfiguration            `json:"bastion,omitempty"`
-	FailureReason             *errors.DeprecatedCAPIClusterStatusError    `json:"failureReason,omitempty"`
-	FailureMessage            *string                                     `json:"failureMessage,omitempty"`
-	Conditions                *corev1beta1.Conditions                     `json:"conditions,omitempty"`
+	Ready                     *bool                                               `json:"ready,omitempty"`
+	Initialization            *ClusterInitializationApplyConfiguration            `json:"initialization,omitempty"`
+	Network                   *NetworkStatusWithSubnetsApplyConfiguration         `json:"network,omitempty"`
+	ExternalNetwork           *NetworkStatusApplyConfiguration                    `json:"externalNetwork,omitempty"`
+	Router                    *RouterApplyConfiguration                           `json:"router,omitempty"`
+	APIServerLoadBalancer     *LoadBalancerApplyConfiguration                     `json:"apiServerLoadBalancer,omitempty"`
+	FailureDomains            *corev1beta1.FailureDomains                         `json:"failureDomains,omitempty"`
+	ControlPlaneSecurityGroup *SecurityGroupStatusApplyConfiguration              `json:"controlPlaneSecurityGroup,omitempty"`
+	WorkerSecurityGroup       *SecurityGroupStatusApplyConfiguration              `json:"workerSecurityGroup,omitempty"`
+	BastionSecurityGroup      *SecurityGroupStatusApplyConfiguration              `json:"bastionSecurityGroup,omitempty"`
+	Bastion                   *BastionStatusApplyConfiguration                    `json:"bastion,omitempty"`
+	FailureReason             *errors.DeprecatedCAPIClusterStatusError            `json:"failureReason,omitempty"`
+	FailureMessage            *string                                             `json:"failureMessage,omitempty"`
+	Conditions                *corev1beta1.Conditions                             `json:"conditions,omitempty"`
+	Extensions                *OpenStackClusterExtensionsStatusApplyConfiguration `json:"extensions,omitempty"`
 }
 
 // OpenStackClusterStatusApplyConfiguration constructs a declarative configuration of the OpenStackClusterStatus type for use with
@@ -157,5 +158,13 @@ func (b *OpenStackClusterStatusApplyConfiguration) WithFailureMessage(value stri
 // If called multiple times, the Conditions field is set to the value of the last call.
 func (b *OpenStackClusterStatusApplyConfiguration) WithConditions(value corev1beta1.Conditions) *OpenStackClusterStatusApplyConfiguration {
 	b.Conditions = &value
+	return b
+}
+
+// WithExtensions sets the Extensions field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Extensions field is set to the value of the last call.
+func (b *OpenStackClusterStatusApplyConfiguration) WithExtensions(value *OpenStackClusterExtensionsStatusApplyConfiguration) *OpenStackClusterStatusApplyConfiguration {
+	b.Extensions = value
 	return b
 }

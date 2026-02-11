@@ -419,6 +419,11 @@ func (r *OpenStackMachineReconciler) reconcileNormal(ctx context.Context, scope 
 	}
 
 	scope.Logger().Info("Reconciled Machine create successfully")
+
+	if err := r.reconcileMachineExtensions(ctx, scope, openStackMachine, openStackCluster); err != nil {
+		return ctrl.Result{}, err
+	}
+
 	return ctrl.Result{}, nil
 }
 

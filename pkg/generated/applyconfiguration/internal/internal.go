@@ -600,12 +600,151 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: type
       type:
         scalar: string
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.CiliumNetworkingStatus
+  map:
+    fields:
+    - name: defaultSubnetID
+      type:
+        scalar: string
+    - name: projectID
+      type:
+        scalar: string
+    - name: securityGroupIDs
+      type:
+        list:
+          elementType:
+            scalar: string
+          elementRelationship: atomic
+    - name: webhookEnable
+      type:
+        scalar: boolean
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterEndpointsExtensionsStatus
+  map:
+    fields:
+    - name: cinder
+      type:
+        scalar: string
+    - name: keystone
+      type:
+        scalar: string
+    - name: neutron
+      type:
+        scalar: string
+    - name: nova
+      type:
+        scalar: string
 - name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterInitialization
   map:
     fields:
     - name: provisioned
       type:
         scalar: boolean
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterLoadBalancersExtensionsStatus
+  map:
+    fields:
+    - name: controlPlane
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterVIPStatus
+    - name: harbor
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterVIPStatus
+    - name: ingress
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterVIPStatus
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterNetworkInterfacesExtensionsSpec
+  map:
+    fields:
+    - name: flannel
+      type:
+        scalar: string
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterNetworkingExtensionsSpec
+  map:
+    fields:
+    - name: kubeNetworkPlugin
+      type:
+        scalar: string
+      default: ""
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterNetworkingExtensionsStatus
+  map:
+    fields:
+    - name: cilium
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.CiliumNetworkingStatus
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterOpenStackAppCredentialStatus
+  map:
+    fields:
+    - name: ref
+      type:
+        scalar: string
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterOpenStackExtensionsSpec
+  map:
+    elementType:
+      scalar: untyped
+      list:
+        elementType:
+          namedType: __untyped_atomic_
+        elementRelationship: atomic
+      map:
+        elementType:
+          namedType: __untyped_deduced_
+        elementRelationship: separable
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterOpenStackExtensionsStatus
+  map:
+    fields:
+    - name: appCredential
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterOpenStackAppCredentialStatus
+    - name: cinder
+      type:
+        scalar: string
+    - name: keystone
+      type:
+        scalar: string
+    - name: mgmt
+      type:
+        scalar: string
+    - name: neutron
+      type:
+        scalar: string
+    - name: nova
+      type:
+        scalar: string
+    - name: project
+      type:
+        scalar: string
+    - name: projectDomain
+      type:
+        scalar: string
+    - name: region
+      type:
+        scalar: string
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterPlatformExtensionsStatus
+  map:
+    fields:
+    - name: management
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterPlatformManagementStatus
+    - name: ntp
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterPlatformNTPStatus
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterPlatformManagementStatus
+  map:
+    fields:
+    - name: vip
+      type:
+        scalar: string
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterPlatformNTPStatus
+  map:
+    fields:
+    - name: server
+      type:
+        scalar: string
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterVIPStatus
+  map:
+    fields:
+    - name: vip
+      type:
+        scalar: string
 - name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ExternalRouterIPParam
   map:
     fields:
@@ -689,6 +828,27 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: provisioned
       type:
         scalar: boolean
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.MachineLoadBalancersSpec
+  map:
+    fields:
+    - name: controlPlaneVIP
+      type:
+        scalar: boolean
+    - name: ingressVIP
+      type:
+        scalar: boolean
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.MachineMemoryExtensionsSpec
+  map:
+    fields:
+    - name: reserved
+      type:
+        scalar: string
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.MachineNetworkInterfacesSpec
+  map:
+    fields:
+    - name: keepalived
+      type:
+        scalar: string
 - name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.MachineResources
   map:
     fields:
@@ -841,6 +1001,36 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackClusterStatus
       default: {}
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackClusterExtensionsSpec
+  map:
+    fields:
+    - name: networkInterfaces
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterNetworkInterfacesExtensionsSpec
+    - name: networking
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterNetworkingExtensionsSpec
+    - name: openStack
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterOpenStackExtensionsSpec
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackClusterExtensionsStatus
+  map:
+    fields:
+    - name: endpoints
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterEndpointsExtensionsStatus
+    - name: loadBalancers
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterLoadBalancersExtensionsStatus
+    - name: networking
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterNetworkingExtensionsStatus
+    - name: openStack
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterOpenStackExtensionsStatus
+    - name: platform
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.ClusterPlatformExtensionsStatus
 - name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackClusterSpec
   map:
     fields:
@@ -880,6 +1070,9 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: disablePortSecurity
       type:
         scalar: boolean
+    - name: extensions
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackClusterExtensionsSpec
     - name: externalNetwork
       type:
         namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.NetworkParam
@@ -944,6 +1137,9 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: controlPlaneSecurityGroup
       type:
         namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.SecurityGroupStatus
+    - name: extensions
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackClusterExtensionsStatus
     - name: externalNetwork
       type:
         namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.NetworkStatus
@@ -1043,6 +1239,30 @@ var schemaYAML = typed.YAMLObject(`types:
       type:
         namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackMachineStatus
       default: {}
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackMachineExtensionsSpec
+  map:
+    fields:
+    - name: loadBalancers
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.MachineLoadBalancersSpec
+    - name: memory
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.MachineMemoryExtensionsSpec
+    - name: networkInterfaces
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.MachineNetworkInterfacesSpec
+- name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackMachineExtensionsStatus
+  map:
+    elementType:
+      scalar: untyped
+      list:
+        elementType:
+          namedType: __untyped_atomic_
+        elementRelationship: atomic
+      map:
+        elementType:
+          namedType: __untyped_deduced_
+        elementRelationship: separable
 - name: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackMachineSpec
   map:
     fields:
@@ -1057,6 +1277,9 @@ var schemaYAML = typed.YAMLObject(`types:
     - name: configDrive
       type:
         scalar: boolean
+    - name: extensions
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackMachineExtensionsSpec
     - name: flavor
       type:
         scalar: string
@@ -1137,6 +1360,9 @@ var schemaYAML = typed.YAMLObject(`types:
           elementType:
             namedType: io.k8s.sigs.cluster-api.api.core.v1beta1.Condition
           elementRelationship: atomic
+    - name: extensions
+      type:
+        namedType: io.k8s.sigs.cluster-api-provider-openstack.api.v1beta1.OpenStackMachineExtensionsStatus
     - name: failureMessage
       type:
         scalar: string

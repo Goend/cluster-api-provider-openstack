@@ -60,6 +60,21 @@ func (m *MockComputeClient) EXPECT() *MockComputeClientMockRecorder {
 	return m.recorder
 }
 
+// AttachInterface mocks base method.
+func (m *MockComputeClient) AttachInterface(serverID string, createOpts attachinterfaces.CreateOpts) (*attachinterfaces.Interface, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AttachInterface", serverID, createOpts)
+	ret0, _ := ret[0].(*attachinterfaces.Interface)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AttachInterface indicates an expected call of AttachInterface.
+func (mr *MockComputeClientMockRecorder) AttachInterface(serverID, createOpts any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AttachInterface", reflect.TypeOf((*MockComputeClient)(nil).AttachInterface), serverID, createOpts)
+}
+
 // CreateServer mocks base method.
 func (m *MockComputeClient) CreateServer(createOpts servers.CreateOptsBuilder, schedulerHints servers.SchedulerHintOptsBuilder) (*servers.Server, error) {
 	m.ctrl.T.Helper()
