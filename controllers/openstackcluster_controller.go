@@ -30,6 +30,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kerrors "k8s.io/apimachinery/pkg/util/errors"
+	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/utils/ptr"
 	clusterv1beta1 "sigs.k8s.io/cluster-api/api/core/v1beta1"
@@ -66,6 +67,7 @@ const (
 // OpenStackClusterReconciler reconciles a OpenStackCluster object.
 type OpenStackClusterReconciler struct {
 	Client           client.Client
+	DynamicClient    dynamic.Interface
 	Recorder         record.EventRecorder
 	WatchFilterValue string
 	ScopeFactory     scope.Factory
@@ -76,6 +78,7 @@ type OpenStackClusterReconciler struct {
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=openstackclusters/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=cluster.x-k8s.io,resources=clusters;clusters/status,verbs=get;list;watch
 // +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list;watch
+// +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list;watch;create
 // +kubebuilder:rbac:groups=infrastructure.cluster.x-k8s.io,resources=openstackclusteridentities,verbs=get;list;watch
 
 func (r *OpenStackClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, reterr error) {
@@ -386,6 +389,10 @@ func (r *OpenStackClusterReconciler) reconcileNormal(ctx context.Context, scope 
 		return *result, nil
 	}
 	scope.Logger().Info("Reconciled Bastion created successfully")
+
+	if err := r.reconcileClusterExtensions(ctx, scope, cluster, openStackCluster); err != nil {
+		return reconcile.Result{}, err
+	}
 
 	return reconcile.Result{}, nil
 }

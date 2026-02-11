@@ -194,6 +194,10 @@ type OpenStackClusterSpec struct {
 	// machines unless overridden in the machine spec.
 	// +kubebuilder:validation:Required
 	IdentityRef OpenStackIdentityReference `json:"identityRef"`
+
+	// Extensions stores provider-specific knobs consumed by bootstrap/control-plane integrations.
+	// +optional
+	Extensions *OpenStackClusterExtensionsSpec `json:"extensions,omitempty"`
 }
 
 // ClusterInitialization represents the initialization status of the cluster.
@@ -306,6 +310,10 @@ type OpenStackClusterStatus struct {
 	// (both during initial provisioning and after the initial provisioning is completed).
 	// +optional
 	Conditions clusterv1beta1.Conditions `json:"conditions,omitempty"`
+
+	// Extensions surfaces provider-specific facts for bootstrap/control-plane integrations.
+	// +optional
+	Extensions *OpenStackClusterExtensionsStatus `json:"extensions,omitempty"`
 }
 
 // +genclient

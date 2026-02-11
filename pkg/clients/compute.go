@@ -67,6 +67,7 @@ type ComputeClient interface {
 	ListServers(listOpts servers.ListOptsBuilder) ([]servers.Server, error)
 
 	ListAttachedInterfaces(serverID string) ([]attachinterfaces.Interface, error)
+	AttachInterface(serverID string, createOpts attachinterfaces.CreateOpts) (*attachinterfaces.Interface, error)
 	DeleteAttachedInterface(serverID, portID string) error
 
 	ListServerGroups() ([]servergroups.ServerGroup, error)
@@ -182,6 +183,15 @@ func (c computeClient) ListAttachedInterfaces(serverID string) ([]attachinterfac
 	return attachinterfaces.ExtractInterfaces(interfaces)
 }
 
+func (c computeClient) AttachInterface(serverID string, createOpts attachinterfaces.CreateOpts) (*attachinterfaces.Interface, error) {
+	mc := metrics.NewMetricPrometheusContext("server_os_interface", "create")
+	iface, err := attachinterfaces.Create(context.TODO(), c.client, serverID, createOpts).Extract()
+	if mc.ObserveRequest(err) != nil {
+		return nil, err
+	}
+	return iface, nil
+}
+
 func (c computeClient) DeleteAttachedInterface(serverID, portID string) error {
 	mc := metrics.NewMetricPrometheusContext("server_os_interface", "delete")
 	err := attachinterfaces.Delete(context.TODO(), c.client, serverID, portID).ExtractErr()
@@ -254,6 +264,10 @@ func (e computeErrorClient) ListServers(_ servers.ListOptsBuilder) ([]servers.Se
 }
 
 func (e computeErrorClient) ListAttachedInterfaces(_ string) ([]attachinterfaces.Interface, error) {
+	return nil, e.error
+}
+
+func (e computeErrorClient) AttachInterface(_ string, _ attachinterfaces.CreateOpts) (*attachinterfaces.Interface, error) {
 	return nil, e.error
 }
 

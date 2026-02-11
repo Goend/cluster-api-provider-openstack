@@ -72,8 +72,32 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &apiv1beta1.BlockDeviceStorageApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("BlockDeviceVolume"):
 		return &apiv1beta1.BlockDeviceVolumeApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("CiliumNetworkingStatus"):
+		return &apiv1beta1.CiliumNetworkingStatusApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ClusterEndpointsExtensionsStatus"):
+		return &apiv1beta1.ClusterEndpointsExtensionsStatusApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("ClusterInitialization"):
 		return &apiv1beta1.ClusterInitializationApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ClusterLoadBalancersExtensionsStatus"):
+		return &apiv1beta1.ClusterLoadBalancersExtensionsStatusApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ClusterNetworkingExtensionsSpec"):
+		return &apiv1beta1.ClusterNetworkingExtensionsSpecApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ClusterNetworkingExtensionsStatus"):
+		return &apiv1beta1.ClusterNetworkingExtensionsStatusApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ClusterNetworkInterfacesExtensionsSpec"):
+		return &apiv1beta1.ClusterNetworkInterfacesExtensionsSpecApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ClusterOpenStackAppCredentialStatus"):
+		return &apiv1beta1.ClusterOpenStackAppCredentialStatusApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ClusterOpenStackExtensionsStatus"):
+		return &apiv1beta1.ClusterOpenStackExtensionsStatusApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ClusterPlatformExtensionsStatus"):
+		return &apiv1beta1.ClusterPlatformExtensionsStatusApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ClusterPlatformManagementStatus"):
+		return &apiv1beta1.ClusterPlatformManagementStatusApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ClusterPlatformNTPStatus"):
+		return &apiv1beta1.ClusterPlatformNTPStatusApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("ClusterVIPStatus"):
+		return &apiv1beta1.ClusterVIPStatusApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("ExternalRouterIPParam"):
 		return &apiv1beta1.ExternalRouterIPParamApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("FilterByNeutronTags"):
@@ -88,6 +112,12 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &apiv1beta1.LoadBalancerApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("MachineInitialization"):
 		return &apiv1beta1.MachineInitializationApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("MachineLoadBalancersSpec"):
+		return &apiv1beta1.MachineLoadBalancersSpecApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("MachineMemoryExtensionsSpec"):
+		return &apiv1beta1.MachineMemoryExtensionsSpecApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("MachineNetworkInterfacesSpec"):
+		return &apiv1beta1.MachineNetworkInterfacesSpecApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("MachineResources"):
 		return &apiv1beta1.MachineResourcesApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("ManagedSecurityGroups"):
@@ -104,6 +134,10 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &apiv1beta1.NodeInfoApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("OpenStackCluster"):
 		return &apiv1beta1.OpenStackClusterApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("OpenStackClusterExtensionsSpec"):
+		return &apiv1beta1.OpenStackClusterExtensionsSpecApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("OpenStackClusterExtensionsStatus"):
+		return &apiv1beta1.OpenStackClusterExtensionsStatusApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("OpenStackClusterSpec"):
 		return &apiv1beta1.OpenStackClusterSpecApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("OpenStackClusterStatus"):
@@ -118,6 +152,8 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &apiv1beta1.OpenStackIdentityReferenceApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("OpenStackMachine"):
 		return &apiv1beta1.OpenStackMachineApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("OpenStackMachineExtensionsSpec"):
+		return &apiv1beta1.OpenStackMachineExtensionsSpecApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("OpenStackMachineSpec"):
 		return &apiv1beta1.OpenStackMachineSpecApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("OpenStackMachineStatus"):

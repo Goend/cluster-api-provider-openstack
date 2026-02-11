@@ -568,6 +568,69 @@ func (s *Service) createRule(securityGroupID string, r resolvedSecurityGroupRule
 	return nil
 }
 
+func (s *Service) EnsureAllowAllSecurityGroupRules(securityGroupID string) error {
+	observed, err := s.client.ListSecGroupRule(rules.ListOpts{SecGroupID: securityGroupID})
+	if err != nil {
+		return err
+	}
+
+	desired := []resolvedSecurityGroupRuleSpec{
+		{
+			Description:    "Allow all ingress IPv4",
+			Direction:      "ingress",
+			EtherType:      "IPv4",
+			PortRangeMin:   0,
+			PortRangeMax:   0,
+			Protocol:       "",
+			RemoteIPPrefix: "0.0.0.0/0",
+		},
+		{
+			Description:    "Allow all egress IPv4",
+			Direction:      "egress",
+			EtherType:      "IPv4",
+			PortRangeMin:   0,
+			PortRangeMax:   0,
+			Protocol:       "",
+			RemoteIPPrefix: "0.0.0.0/0",
+		},
+		{
+			Description:    "Allow all ingress IPv6",
+			Direction:      "ingress",
+			EtherType:      "IPv6",
+			PortRangeMin:   0,
+			PortRangeMax:   0,
+			Protocol:       "",
+			RemoteIPPrefix: "::/0",
+		},
+		{
+			Description:    "Allow all egress IPv6",
+			Direction:      "egress",
+			EtherType:      "IPv6",
+			PortRangeMin:   0,
+			PortRangeMax:   0,
+			Protocol:       "",
+			RemoteIPPrefix: "::/0",
+		},
+	}
+
+	for _, desiredRule := range desired {
+		found := false
+		for _, observedRule := range observed {
+			if desiredRule.Matches(observedRule) {
+				found = true
+				break
+			}
+		}
+		if found {
+			continue
+		}
+		if err := s.createRule(securityGroupID, desiredRule); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func getSecControlPlaneGroupName(clusterResourceName string) string {
 	return fmt.Sprintf("%s-cluster-%s-secgroup-%s", secGroupPrefix, clusterResourceName, controlPlaneSuffix)
 }

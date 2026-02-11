@@ -69,6 +69,8 @@ func (*openStackClusterWebhook) ValidateCreate(_ context.Context, objRaw runtime
 		}
 	}
 
+	allErrs = append(allErrs, validateNetworkingExtensions(&newObj.Spec, field.NewPath("spec"))...)
+
 	return aggregateObjErrors(newObj.GroupVersionKind().GroupKind(), newObj.Name, allErrs)
 }
 
@@ -192,6 +194,8 @@ func (*openStackClusterWebhook) ValidateUpdate(_ context.Context, oldObjRaw, new
 		oldObj.Spec.ManagedSecurityGroups.AllowAllInClusterTraffic = false
 		newObj.Spec.ManagedSecurityGroups.AllowAllInClusterTraffic = false
 	}
+
+	allErrs = append(allErrs, validateNetworkingExtensions(&newObj.Spec, field.NewPath("spec"))...)
 
 	// Allow changes only to DNSNameservers in ManagedSubnets spec
 	if newObj.Spec.ManagedSubnets != nil && oldObj.Spec.ManagedSubnets != nil {

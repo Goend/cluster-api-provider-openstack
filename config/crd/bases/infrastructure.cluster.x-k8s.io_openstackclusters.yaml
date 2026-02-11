@@ -465,6 +465,29 @@ spec:
                       configDrive:
                         description: Config Drive support
                         type: boolean
+                      extensions:
+                        description: Extensions stores machine-scoped knobs for bootstrap/control-plane
+                          integrations.
+                        properties:
+                          loadBalancers:
+                            properties:
+                              controlPlaneVIP:
+                                type: boolean
+                              ingressVIP:
+                                type: boolean
+                            type: object
+                          memory:
+                            properties:
+                              reserved:
+                                pattern: ^-\\d+$
+                                type: string
+                            type: object
+                          networkInterfaces:
+                            properties:
+                              keepalived:
+                                type: string
+                            type: object
+                        type: object
                       flavor:
                         description: The flavor reference for the flavor for your
                           server instance.
@@ -1329,6 +1352,30 @@ spec:
                   DisablePortSecurity disables the port security of the network created for the
                   Kubernetes cluster, which also disables SecurityGroups
                 type: boolean
+              extensions:
+                description: Extensions stores provider-specific knobs consumed by
+                  bootstrap/control-plane integrations.
+                properties:
+                  networkInterfaces:
+                    properties:
+                      flannel:
+                        description: Required when kubeNetworkPlugin is set to flannel.
+                        type: string
+                    type: object
+                  networking:
+                    properties:
+                      kubeNetworkPlugin:
+                        description: 'Supported values: cilium, flannel.'
+                        enum:
+                        - cilium
+                        - flannel
+                        type: string
+                    required:
+                    - kubeNetworkPlugin
+                    type: object
+                  openStack:
+                    type: object
+                type: object
               externalNetwork:
                 description: |-
                   ExternalNetwork is the OpenStack Network to be used to get public internet to the VMs.
@@ -2529,6 +2576,93 @@ spec:
                 required:
                 - id
                 - name
+                type: object
+              extensions:
+                description: Extensions surfaces provider-specific facts for bootstrap/control-plane
+                  integrations.
+                properties:
+                  endpoints:
+                    properties:
+                      cinder:
+                        type: string
+                      keystone:
+                        type: string
+                      neutron:
+                        type: string
+                      nova:
+                        type: string
+                    type: object
+                  loadBalancers:
+                    properties:
+                      controlPlane:
+                        properties:
+                          vip:
+                            type: string
+                        type: object
+                      harbor:
+                        properties:
+                          vip:
+                            type: string
+                        type: object
+                      ingress:
+                        properties:
+                          vip:
+                            type: string
+                        type: object
+                    type: object
+                  networking:
+                    properties:
+                      cilium:
+                        properties:
+                          defaultSubnetID:
+                            type: string
+                          projectID:
+                            type: string
+                          securityGroupIDs:
+                            items:
+                              type: string
+                            type: array
+                          webhookEnable:
+                            type: boolean
+                        type: object
+                    type: object
+                  openStack:
+                    properties:
+                      appCredential:
+                        properties:
+                          ref:
+                            type: string
+                        type: object
+                      cinder:
+                        type: string
+                      keystone:
+                        type: string
+                      mgmt:
+                        type: string
+                      neutron:
+                        type: string
+                      nova:
+                        type: string
+                      project:
+                        type: string
+                      projectDomain:
+                        type: string
+                      region:
+                        type: string
+                    type: object
+                  platform:
+                    properties:
+                      management:
+                        properties:
+                          vip:
+                            type: string
+                        type: object
+                      ntp:
+                        properties:
+                          server:
+                            type: string
+                        type: object
+                    type: object
                 type: object
               externalNetwork:
                 description: ExternalNetwork contains information about the external

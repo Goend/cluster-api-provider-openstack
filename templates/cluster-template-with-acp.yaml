@@ -1,0 +1,201 @@
+apiVersion: v1
+data:
+  cacert: ${OPENSTACK_CLOUD_CACERT_B64}
+  clouds.yaml: ${OPENSTACK_CLOUD_YAML_B64}
+kind: Secret
+metadata:
+  labels:
+    clusterctl.cluster.x-k8s.io/move: "true"
+  name: ${CLUSTER_NAME}-cloud-config
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
+kind: Config
+metadata:
+  name: ${CLUSTER_NAME}-vars-business
+data: {}
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
+kind: Config
+metadata:
+  name: ${CLUSTER_NAME}-vars-fixed
+data: {}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ${CLUSTER_NAME}-hosts-conf
+data:
+  inventory.ini: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ${CLUSTER_NAME}-vars-conf
+data:
+  vars.yaml: ""
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1
+kind: AnsibleConfigTemplate
+metadata:
+  name: ${CLUSTER_NAME}-md-0
+spec:
+  template:
+    spec:
+      role:
+      - kube-node
+      varsConfigRefs:
+        business:
+          name: ${CLUSTER_NAME}-vars-business
+        fixed:
+          name: ${CLUSTER_NAME}-vars-fixed
+      clusterTemplate:
+        apiVersion: cluster.kubean.io/v1alpha1
+        kind: Cluster
+      clusterOperationTemplate:
+        apiVersion: clusterops.kubean.io/v1alpha1
+        kind: ClusterOperation
+        spec:
+          image: ${KUBEAN_JOB_IMAGE}
+          actionType: ${KUBEAN_ACTION_TYPE}
+---
+apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
+kind: AnsibleControlPlane
+metadata:
+  name: ${CLUSTER_NAME}-control-plane
+spec:
+  replicas: ${CONTROL_PLANE_MACHINE_COUNT}
+  version: ${KUBERNETES_VERSION}
+  machineTemplate:
+    spec:
+      infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
+        kind: OpenStackMachineTemplate
+        name: ${CLUSTER_NAME}-control-plane
+  ansibleConfigSpec:
+    role:
+    - kube-master
+    - etcd
+    varsConfigRefs:
+      business:
+        name: ${CLUSTER_NAME}-vars-business
+      fixed:
+        name: ${CLUSTER_NAME}-vars-fixed
+    clusterTemplate:
+      apiVersion: cluster.kubean.io/v1alpha1
+      kind: Cluster
+    clusterOperationTemplate:
+      apiVersion: clusterops.kubean.io/v1alpha1
+      kind: ClusterOperation
+      spec:
+        image: ${KUBEAN_JOB_IMAGE}
+        actionType: ${KUBEAN_ACTION_TYPE}
+---
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: Cluster
+metadata:
+  name: ${CLUSTER_NAME}
+spec:
+  clusterNetwork:
+    pods:
+      cidrBlocks:
+      - 192.168.0.0/16
+    serviceDomain: cluster.local
+  controlPlaneRef:
+    apiGroup: controlplane.cluster.x-k8s.io
+    kind: AnsibleControlPlane
+    name: ${CLUSTER_NAME}-control-plane
+  infrastructureRef:
+    apiGroup: infrastructure.cluster.x-k8s.io
+    kind: OpenStackCluster
+    name: ${CLUSTER_NAME}
+---
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: MachineDeployment
+metadata:
+  name: ${CLUSTER_NAME}-md-0
+spec:
+  clusterName: ${CLUSTER_NAME}
+  replicas: ${WORKER_MACHINE_COUNT}
+  selector:
+    matchLabels: null
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiGroup: bootstrap.cluster.x-k8s.io
+          kind: AnsibleConfigTemplate
+          name: ${CLUSTER_NAME}-md-0
+      clusterName: ${CLUSTER_NAME}
+      failureDomain: ${OPENSTACK_FAILURE_DOMAIN}
+      infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
+        kind: OpenStackMachineTemplate
+        name: ${CLUSTER_NAME}-md-0
+      version: ${KUBERNETES_VERSION}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackCluster
+metadata:
+  name: ${CLUSTER_NAME}
+spec:
+  apiServerLoadBalancer:
+    enabled: true
+  externalNetwork:
+    id: ${OPENSTACK_EXTERNAL_NETWORK_ID}
+  identityRef:
+    cloudName: ${OPENSTACK_CLOUD}
+    name: ${CLUSTER_NAME}-cloud-config
+  managedSecurityGroups:
+    allNodesSecurityGroupRules:
+    - description: Created by cluster-api-provider-openstack - BGP (calico)
+      direction: ingress
+      etherType: IPv4
+      name: BGP (Calico)
+      portRangeMax: 179
+      portRangeMin: 179
+      protocol: tcp
+      remoteManagedGroups:
+      - controlplane
+      - worker
+    - description: Created by cluster-api-provider-openstack - IP-in-IP (calico)
+      direction: ingress
+      etherType: IPv4
+      name: IP-in-IP (Calico)
+      protocol: "4"
+      remoteManagedGroups:
+      - controlplane
+      - worker
+  managedSubnets:
+  - cidr: 10.6.0.0/24
+    dnsNameservers:
+    - ${OPENSTACK_DNS_NAMESERVERS}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: ${CLUSTER_NAME}-control-plane
+spec:
+  template:
+    spec:
+      flavor: ${OPENSTACK_CONTROL_PLANE_MACHINE_FLAVOR}
+      image:
+        filter:
+          name: ${OPENSTACK_IMAGE_NAME}
+      sshKeyName: ${OPENSTACK_SSH_KEY_NAME}
+      extensions:
+        loadBalancers:
+          controlPlaneVIP: true
+          ingressVIP: true
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: ${CLUSTER_NAME}-md-0
+spec:
+  template:
+    spec:
+      flavor: ${OPENSTACK_NODE_MACHINE_FLAVOR}
+      image:
+        filter:
+          name: ${OPENSTACK_IMAGE_NAME}
+      sshKeyName: ${OPENSTACK_SSH_KEY_NAME}

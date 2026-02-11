@@ -216,12 +216,66 @@ func (s *providerScope) NewLbClient() (clients.LbClient, error) {
 	return clients.NewLbClient(s.providerClient, s.providerClientOpts)
 }
 
+func (s *providerScope) NewIdentityClient() (*gophercloud.ServiceClient, error) {
+	endpointOpts := gophercloud.EndpointOpts{
+		Region: s.providerClientOpts.RegionName,
+	}
+	return openstack.NewIdentityV3(s.providerClient, endpointOpts)
+}
+
+func (s *providerScope) ServiceEndpoint(service string) (string, error) {
+	endpointOpts := gophercloud.EndpointOpts{
+		Region:       s.providerClientOpts.RegionName,
+		Availability: clientconfig.GetEndpointType(s.providerClientOpts.EndpointType),
+	}
+	switch service {
+	case "keystone":
+		client, err := openstack.NewIdentityV3(s.providerClient, endpointOpts)
+		if err != nil {
+			return "", err
+		}
+		return client.Endpoint, nil
+	case "cinder":
+		client, err := openstack.NewBlockStorageV3(s.providerClient, endpointOpts)
+		if err != nil {
+			return "", err
+		}
+		return client.Endpoint, nil
+	case "nova":
+		client, err := openstack.NewComputeV2(s.providerClient, endpointOpts)
+		if err != nil {
+			return "", err
+		}
+		return client.Endpoint, nil
+	case "neutron":
+		client, err := openstack.NewNetworkV2(s.providerClient, endpointOpts)
+		if err != nil {
+			return "", err
+		}
+		return client.Endpoint, nil
+	default:
+		return "", fmt.Errorf("unsupported service %q", service)
+	}
+}
+
 func (s *providerScope) ExtractToken() (*tokens.Token, error) {
 	client, err := openstack.NewIdentityV3(s.providerClient, gophercloud.EndpointOpts{})
 	if err != nil {
 		return nil, fmt.Errorf("create new identity service client: %w", err)
 	}
 	return tokens.Get(context.TODO(), client, s.providerClient.Token()).ExtractToken()
+}
+
+func (s *providerScope) AuthResult() gophercloud.AuthResult {
+	return s.providerClient.GetAuthResult()
+}
+
+func (s *providerScope) IdentityEndpoint() string {
+	return s.providerClient.IdentityEndpoint
+}
+
+func (s *providerScope) RegionName() string {
+	return s.providerClientOpts.RegionName
 }
 
 func NewProviderClient(cloud clientconfig.Cloud, regionName string, caCert []byte, logger logr.Logger) (*gophercloud.ProviderClient, *clientconfig.ClientOpts, string, error) {

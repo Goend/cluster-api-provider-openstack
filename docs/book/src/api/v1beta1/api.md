@@ -404,6 +404,20 @@ to be used when reconciling this cluster. It is also to reconcile
 machines unless overridden in the machine spec.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>extensions</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsSpec">
+OpenStackClusterExtensionsSpec
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Extensions stores provider-specific knobs consumed by bootstrap/control-plane integrations.</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -768,6 +782,20 @@ will be assigned to the OpenStackMachine.</p>
 <p>SchedulerHintAdditionalProperties are arbitrary key/value pairs that provide additional hints
 to the OpenStack scheduler. These hints can influence how instances are placed on the infrastructure,
 such as specifying certain host aggregates or availability zones.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>extensions</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineExtensionsSpec">
+OpenStackMachineExtensionsSpec
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Extensions stores machine-scoped knobs for bootstrap/control-plane integrations.</p>
 </td>
 </tr>
 </table>
@@ -1577,6 +1605,122 @@ availability zone.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.CiliumNetworkingStatus">CiliumNetworkingStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterNetworkingExtensionsStatus">ClusterNetworkingExtensionsStatus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>projectID</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>defaultSubnetID</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>securityGroupIDs</code><br/>
+<em>
+[]string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>webhookEnable</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterEndpointsExtensionsStatus">ClusterEndpointsExtensionsStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsStatus">OpenStackClusterExtensionsStatus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>keystone</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>cinder</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>nova</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>neutron</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterInitialization">ClusterInitialization
 </h3>
 <p>
@@ -1605,6 +1749,420 @@ bool
 <em>(Optional)</em>
 <p>Provisioned is set to true when the initial provisioning of the cluster infrastructure is completed.
 The value of this field is never updated after provisioning is completed.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterLoadBalancersExtensionsStatus">ClusterLoadBalancersExtensionsStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsStatus">OpenStackClusterExtensionsStatus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>controlPlane</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterVIPStatus">
+ClusterVIPStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>ingress</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterVIPStatus">
+ClusterVIPStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>harbor</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterVIPStatus">
+ClusterVIPStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterNetworkInterfacesExtensionsSpec">ClusterNetworkInterfacesExtensionsSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsSpec">OpenStackClusterExtensionsSpec</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>flannel</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Required when kubeNetworkPlugin is set to flannel.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterNetworkingExtensionsSpec">ClusterNetworkingExtensionsSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsSpec">OpenStackClusterExtensionsSpec</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>kubeNetworkPlugin</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Supported values: cilium, flannel.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterNetworkingExtensionsStatus">ClusterNetworkingExtensionsStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsStatus">OpenStackClusterExtensionsStatus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>cilium</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.CiliumNetworkingStatus">
+CiliumNetworkingStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterOpenStackAppCredentialStatus">ClusterOpenStackAppCredentialStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterOpenStackExtensionsStatus">ClusterOpenStackExtensionsStatus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>ref</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterOpenStackExtensionsSpec">ClusterOpenStackExtensionsSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsSpec">OpenStackClusterExtensionsSpec</a>)
+</p>
+<p>
+</p>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterOpenStackExtensionsStatus">ClusterOpenStackExtensionsStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsStatus">OpenStackClusterExtensionsStatus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>mgmt</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>keystone</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>cinder</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>nova</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>neutron</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>project</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>projectDomain</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>appCredential</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterOpenStackAppCredentialStatus">
+ClusterOpenStackAppCredentialStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>region</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterPlatformExtensionsStatus">ClusterPlatformExtensionsStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsStatus">OpenStackClusterExtensionsStatus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>ntp</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterPlatformNTPStatus">
+ClusterPlatformNTPStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>management</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterPlatformManagementStatus">
+ClusterPlatformManagementStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterPlatformManagementStatus">ClusterPlatformManagementStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterPlatformExtensionsStatus">ClusterPlatformExtensionsStatus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>vip</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterPlatformNTPStatus">ClusterPlatformNTPStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterPlatformExtensionsStatus">ClusterPlatformExtensionsStatus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>server</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.ClusterVIPStatus">ClusterVIPStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterLoadBalancersExtensionsStatus">ClusterLoadBalancersExtensionsStatus</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>vip</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
 </td>
 </tr>
 </tbody>
@@ -2032,6 +2590,100 @@ The value of this field is never updated after provisioning is completed.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.MachineLoadBalancersSpec">MachineLoadBalancersSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineExtensionsSpec">OpenStackMachineExtensionsSpec</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>controlPlaneVIP</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>ingressVIP</code><br/>
+<em>
+bool
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.MachineMemoryExtensionsSpec">MachineMemoryExtensionsSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineExtensionsSpec">OpenStackMachineExtensionsSpec</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>reserved</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.MachineNetworkInterfacesSpec">MachineNetworkInterfacesSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineExtensionsSpec">OpenStackMachineExtensionsSpec</a>)
+</p>
+<p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>keepalived</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="infrastructure.cluster.x-k8s.io/v1beta1.MachineResources">MachineResources
 </h3>
 <p>
@@ -2397,6 +3049,140 @@ This may be a string like &lsquo;linux&rsquo; or &lsquo;windows&rsquo;.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsSpec">OpenStackClusterExtensionsSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterSpec">OpenStackClusterSpec</a>)
+</p>
+<p>
+<p>OpenStackClusterExtensionsSpec captures provider-specific knobs consumed by bootstrap/controller layers.</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>networking</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterNetworkingExtensionsSpec">
+ClusterNetworkingExtensionsSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>networkInterfaces</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterNetworkInterfacesExtensionsSpec">
+ClusterNetworkInterfacesExtensionsSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>openStack</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterOpenStackExtensionsSpec">
+ClusterOpenStackExtensionsSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsStatus">OpenStackClusterExtensionsStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterStatus">OpenStackClusterStatus</a>)
+</p>
+<p>
+<p>OpenStackClusterExtensionsStatus surfaces infra-derived facts for bootstrap/ACP.</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>networking</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterNetworkingExtensionsStatus">
+ClusterNetworkingExtensionsStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>loadBalancers</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterLoadBalancersExtensionsStatus">
+ClusterLoadBalancersExtensionsStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>platform</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterPlatformExtensionsStatus">
+ClusterPlatformExtensionsStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>openStack</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterOpenStackExtensionsStatus">
+ClusterOpenStackExtensionsStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>endpoints</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.ClusterEndpointsExtensionsStatus">
+ClusterEndpointsExtensionsStatus
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
 <h3 id="infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterSpec">OpenStackClusterSpec
 </h3>
 <p>
@@ -2752,6 +3538,20 @@ to be used when reconciling this cluster. It is also to reconcile
 machines unless overridden in the machine spec.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>extensions</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsSpec">
+OpenStackClusterExtensionsSpec
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Extensions stores provider-specific knobs consumed by bootstrap/control-plane integrations.</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterStatus">OpenStackClusterStatus
@@ -2992,6 +3792,20 @@ sigs.k8s.io/cluster-api/api/core/v1beta1.Conditions
 This field surfaces into Cluster&rsquo;s status.conditions[InfrastructureReady] condition.
 The Ready condition must surface issues during the entire lifecycle of the OpenStackCluster
 (both during initial provisioning and after the initial provisioning is completed).</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>extensions</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsStatus">
+OpenStackClusterExtensionsStatus
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Extensions surfaces provider-specific facts for bootstrap/control-plane integrations.</p>
 </td>
 </tr>
 </tbody>
@@ -3363,6 +4177,20 @@ to be used when reconciling this cluster. It is also to reconcile
 machines unless overridden in the machine spec.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>extensions</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackClusterExtensionsSpec">
+OpenStackClusterExtensionsSpec
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Extensions stores provider-specific knobs consumed by bootstrap/control-plane integrations.</p>
+</td>
+</tr>
 </table>
 </td>
 </tr>
@@ -3470,6 +4298,70 @@ value will be included in providerID.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineExtensionsSpec">OpenStackMachineExtensionsSpec
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineSpec">OpenStackMachineSpec</a>)
+</p>
+<p>
+<p>OpenStackMachineExtensionsSpec captures machine-scoped knobs.</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>networkInterfaces</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.MachineNetworkInterfacesSpec">
+MachineNetworkInterfacesSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>loadBalancers</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.MachineLoadBalancersSpec">
+MachineLoadBalancersSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>memory</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.MachineMemoryExtensionsSpec">
+MachineMemoryExtensionsSpec
+</a>
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineExtensionsStatus">OpenStackMachineExtensionsStatus
+</h3>
+<p>
+(<em>Appears on:</em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineStatus">OpenStackMachineStatus</a>)
+</p>
+<p>
+<p>OpenStackMachineExtensionsStatus surfaces infra-derived machine data.</p>
+</p>
 <h3 id="infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineSpec">OpenStackMachineSpec
 </h3>
 <p>
@@ -3711,6 +4603,20 @@ to the OpenStack scheduler. These hints can influence how instances are placed o
 such as specifying certain host aggregates or availability zones.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>extensions</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineExtensionsSpec">
+OpenStackMachineExtensionsSpec
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Extensions stores machine-scoped knobs for bootstrap/control-plane integrations.</p>
+</td>
+</tr>
 </tbody>
 </table>
 <h3 id="infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineStatus">OpenStackMachineStatus
@@ -3880,6 +4786,20 @@ sigs.k8s.io/cluster-api/api/core/v1beta1.Conditions
 This field surfaces into Machine&rsquo;s status.conditions[InfrastructureReady] condition.
 The Ready condition must surface issues during the entire lifecycle of the OpenStackMachine
 (both during initial provisioning and after the initial provisioning is completed).</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>extensions</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineExtensionsStatus">
+OpenStackMachineExtensionsStatus
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Extensions surfaces provider-specific machine facts for bootstrap/control-plane integrations.</p>
 </td>
 </tr>
 </tbody>
@@ -4135,6 +5055,20 @@ will be assigned to the OpenStackMachine.</p>
 <p>SchedulerHintAdditionalProperties are arbitrary key/value pairs that provide additional hints
 to the OpenStack scheduler. These hints can influence how instances are placed on the infrastructure,
 such as specifying certain host aggregates or availability zones.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>extensions</code><br/>
+<em>
+<a href="#infrastructure.cluster.x-k8s.io/v1beta1.OpenStackMachineExtensionsSpec">
+OpenStackMachineExtensionsSpec
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>Extensions stores machine-scoped knobs for bootstrap/control-plane integrations.</p>
 </td>
 </tr>
 </table>
@@ -5146,6 +6080,61 @@ This field is required if type is &lsquo;String&rsquo;, and must not be set othe
 </tr><tr><td><p>&#34;String&#34;</p></td>
 <td></td>
 </tr></tbody>
+</table>
+<h3 id="infrastructure.cluster.x-k8s.io/v1beta1.SecretKeyReference">SecretKeyReference
+</h3>
+<p>
+<p>SecretKeyReference extends SecretReference with an optional data key.</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>namespace</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>key</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td>
+<code>usernameKey</code><br/>
+<em>
+string
+</em>
+</td>
+<td>
+</td>
+</tr>
+</tbody>
 </table>
 <h3 id="infrastructure.cluster.x-k8s.io/v1beta1.SecurityGroupFilter">SecurityGroupFilter
 </h3>

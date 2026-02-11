@@ -7,6 +7,7 @@ API rule violation: list_type_missing,sigs.k8s.io/cluster-api-provider-openstack
 API rule violation: list_type_missing,sigs.k8s.io/cluster-api-provider-openstack/api/v1alpha1,OpenStackServerStatus,Addresses
 API rule violation: list_type_missing,sigs.k8s.io/cluster-api-provider-openstack/api/v1alpha1,ResolvedServerSpec,Ports
 API rule violation: list_type_missing,sigs.k8s.io/cluster-api-provider-openstack/api/v1alpha1,ServerResources,Ports
+API rule violation: list_type_missing,sigs.k8s.io/cluster-api-provider-openstack/api/v1beta1,CiliumNetworkingStatus,SecurityGroupIDs
 API rule violation: list_type_missing,sigs.k8s.io/cluster-api-provider-openstack/api/v1beta1,LoadBalancer,AllowedCIDRs
 API rule violation: list_type_missing,sigs.k8s.io/cluster-api-provider-openstack/api/v1beta1,LoadBalancer,Tags
 API rule violation: list_type_missing,sigs.k8s.io/cluster-api-provider-openstack/api/v1beta1,MachineResources,Ports

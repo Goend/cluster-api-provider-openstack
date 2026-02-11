@@ -42,6 +42,7 @@ type OpenStackMachineSpecApplyConfiguration struct {
 	IdentityRef                       *OpenStackIdentityReferenceApplyConfiguration       `json:"identityRef,omitempty"`
 	FloatingIPPoolRef                 *v1.TypedLocalObjectReference                       `json:"floatingIPPoolRef,omitempty"`
 	SchedulerHintAdditionalProperties []SchedulerHintAdditionalPropertyApplyConfiguration `json:"schedulerHintAdditionalProperties,omitempty"`
+	Extensions                        *OpenStackMachineExtensionsSpecApplyConfiguration   `json:"extensions,omitempty"`
 }
 
 // OpenStackMachineSpecApplyConfiguration constructs a declarative configuration of the OpenStackMachineSpec type for use with
@@ -210,5 +211,13 @@ func (b *OpenStackMachineSpecApplyConfiguration) WithSchedulerHintAdditionalProp
 		}
 		b.SchedulerHintAdditionalProperties = append(b.SchedulerHintAdditionalProperties, *values[i])
 	}
+	return b
+}
+
+// WithExtensions sets the Extensions field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the Extensions field is set to the value of the last call.
+func (b *OpenStackMachineSpecApplyConfiguration) WithExtensions(value *OpenStackMachineExtensionsSpecApplyConfiguration) *OpenStackMachineSpecApplyConfiguration {
+	b.Extensions = value
 	return b
 }
