@@ -616,7 +616,17 @@ func (s *Service) EnsureAllowAllSecurityGroupRules(securityGroupID string) error
 	for _, desiredRule := range desired {
 		found := false
 		for _, observedRule := range observed {
-			if desiredRule.Matches(observedRule) {
+			if matchesRuleIgnoringDescription(desiredRule, observedRule) {
+				s.scope.Logger().Info("Allow-all security group rule already exists",
+					"securityGroupID", securityGroupID,
+					"direction", desiredRule.Direction,
+					"etherType", desiredRule.EtherType,
+					"portRangeMin", desiredRule.PortRangeMin,
+					"portRangeMax", desiredRule.PortRangeMax,
+					"protocol", desiredRule.Protocol,
+					"remoteGroupID", desiredRule.RemoteGroupID,
+					"remoteIPPrefix", desiredRule.RemoteIPPrefix,
+				)
 				found = true
 				break
 			}
@@ -624,11 +634,49 @@ func (s *Service) EnsureAllowAllSecurityGroupRules(securityGroupID string) error
 		if found {
 			continue
 		}
+		s.scope.Logger().Info("Creating missing allow-all security group rule",
+			"securityGroupID", securityGroupID,
+			"direction", desiredRule.Direction,
+			"etherType", desiredRule.EtherType,
+			"portRangeMin", desiredRule.PortRangeMin,
+			"portRangeMax", desiredRule.PortRangeMax,
+			"protocol", desiredRule.Protocol,
+			"remoteGroupID", desiredRule.RemoteGroupID,
+			"remoteIPPrefix", desiredRule.RemoteIPPrefix,
+		)
 		if err := s.createRule(securityGroupID, desiredRule); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func matchesRuleIgnoringDescription(desired resolvedSecurityGroupRuleSpec, observed rules.SecGroupRule) bool {
+	if !remoteIPPrefixMatches(desired.RemoteIPPrefix, observed.RemoteIPPrefix, desired.EtherType) {
+		return false
+	}
+	return desired.Direction == observed.Direction &&
+		desired.EtherType == observed.EtherType &&
+		desired.PortRangeMin == observed.PortRangeMin &&
+		desired.PortRangeMax == observed.PortRangeMax &&
+		desired.Protocol == observed.Protocol &&
+		desired.RemoteGroupID == observed.RemoteGroupID
+}
+
+func remoteIPPrefixMatches(desiredPrefix, observedPrefix, etherType string) bool {
+	if desiredPrefix == observedPrefix {
+		return true
+	}
+	// Neutron may store allow-all egress rules without a remote prefix.
+	if observedPrefix == "" {
+		switch etherType {
+		case "IPv4":
+			return desiredPrefix == "0.0.0.0/0"
+		case "IPv6":
+			return desiredPrefix == "::/0"
+		}
+	}
+	return false
 }
 
 func getSecControlPlaneGroupName(clusterResourceName string) string {

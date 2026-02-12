@@ -42,6 +42,7 @@ type MockScopeFactory struct {
 
 	projectID              string
 	clientScopeCreateError error
+	serviceEndpoints       map[string]string
 }
 
 func NewMockScopeFactory(mockCtrl *gomock.Controller, projectID string) *MockScopeFactory {
@@ -58,11 +59,19 @@ func NewMockScopeFactory(mockCtrl *gomock.Controller, projectID string) *MockSco
 		NetworkClient: networkClient,
 		LbClient:      lbClient,
 		projectID:     projectID,
+		serviceEndpoints: map[string]string{},
 	}
 }
 
 func (f *MockScopeFactory) SetClientScopeCreateError(err error) {
 	f.clientScopeCreateError = err
+}
+
+func (f *MockScopeFactory) SetServiceEndpoint(service, endpoint string) {
+	if f.serviceEndpoints == nil {
+		f.serviceEndpoints = map[string]string{}
+	}
+	f.serviceEndpoints[service] = endpoint
 }
 
 func (f *MockScopeFactory) NewClientScopeFromObject(_ context.Context, _ client.Client, _ []byte, _ logr.Logger, _ ...infrav1.IdentityRefProvider) (Scope, error) {
@@ -94,6 +103,13 @@ func (f *MockScopeFactory) NewLbClient() (clients.LbClient, error) {
 
 func (f *MockScopeFactory) NewIdentityClient() (*gophercloud.ServiceClient, error) {
 	return nil, ErrIdentityClientUnavailable
+}
+
+func (f *MockScopeFactory) ServiceEndpoint(service string) (string, error) {
+	if f.serviceEndpoints == nil {
+		return "", nil
+	}
+	return f.serviceEndpoints[service], nil
 }
 
 func (f *MockScopeFactory) ProjectID() string {

@@ -67,6 +67,8 @@ spec:
   version: v1.26.4-es
   machineTemplate:
     spec:
+      clusterName: mj
+      bootstrap: {}
       infrastructureRef:
         apiGroup: infrastructure.cluster.x-k8s.io
         kind: OpenStackMachineTemplate
@@ -140,6 +142,9 @@ metadata:
 spec:
   apiServerLoadBalancer:
     enabled: true
+  extensions:
+    networking:
+      kubeNetworkPlugin: cilium
   externalNetwork:
     id: bbf5eebf-1c7d-4350-b806-a464fa16ec31
   identityRef:
@@ -183,9 +188,11 @@ spec:
           name: eks-kylin-x86_64-150G.raw
       sshKeyName: mj
       extensions:
+        networkInterfaces:
+          keepalived: eth0
         loadBalancers:
           controlPlaneVIP: true
-          ingressVIP: true
+
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackMachineTemplate
@@ -199,3 +206,9 @@ spec:
         filter:
           name: eks-kylin-x86_64-150G.raw
       sshKeyName: mj
+      extensions:
+        networkInterfaces:
+          keepalived: eth0
+      extensions:
+        loadBalancers:
+          ingressVIP: true
