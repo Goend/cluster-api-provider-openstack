@@ -289,12 +289,22 @@ func (r *OpenStackClusterReconciler) reconcileClusterAppCredential(ctx context.C
 		Name:      secretName,
 		Namespace: osc.Namespace,
 	}
-	if err := r.Client.Get(ctx, secretKey, secret); err == nil {
-		ext.OpenStack.AppCredential.Ref = secretName
-		return nil
-	} else if !apierrors.IsNotFound(err) {
-		return err
-	}
+    if err := r.Client.Get(ctx, secretKey, secret); err == nil {
+        // 确保已有 Secret 也带上集群标签，便于 bootstrap 侧的 SecretCachingClient 缓存命中。
+        if secret.Labels == nil {
+            secret.Labels = map[string]string{}
+        }
+        if secret.Labels[clusterv1.ClusterNameLabel] != cluster.Name {
+            secret.Labels[clusterv1.ClusterNameLabel] = cluster.Name
+            if uerr := r.Client.Update(ctx, secret); uerr != nil {
+                return uerr
+            }
+        }
+        ext.OpenStack.AppCredential.Ref = secretName
+        return nil
+    } else if !apierrors.IsNotFound(err) {
+        return err
+    }
 
 	identityClient, err := scope1.NewIdentityClient()
 	if err != nil {
@@ -348,16 +358,18 @@ func (r *OpenStackClusterReconciler) reconcileClusterAppCredential(ctx context.C
 		"clouds.yaml": buf.Bytes(),
 		"cacert":      []byte("\n"),
 	}
-	secret = &corev1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      secretName,
-			Namespace: osc.Namespace,
-			Labels: map[string]string{
-				"creId": appCred.ID,
-			},
-		},
-		Data: secretData,
-	}
+    secret = &corev1.Secret{
+        ObjectMeta: metav1.ObjectMeta{
+            Name:      secretName,
+            Namespace: osc.Namespace,
+            Labels: map[string]string{
+                "creId": appCred.ID,
+                // 添加 CAPI 集群名标签，供 bootstrap-ansible 的 Secret 缓存选择器使用。
+                clusterv1.ClusterNameLabel: cluster.Name,
+            },
+        },
+        Data: secretData,
+    }
 	if err := r.Client.Create(ctx, secret); err != nil {
 		if apierrors.IsAlreadyExists(err) {
 			ext.OpenStack.AppCredential.Ref = secretName

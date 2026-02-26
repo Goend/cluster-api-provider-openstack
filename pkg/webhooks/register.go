@@ -46,6 +46,7 @@ func RegisterAllWithManager(mgr manager.Manager) []error {
 		}
 	}
 
+	// TODO: 这里需要明确
 	// Additionally register webhooks for other types so they get conversion webhooks.
 	for _, conversionOnlyType := range []conversion.Hub{
 		&infrav1.OpenStackClusterList{},

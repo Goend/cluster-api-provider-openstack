@@ -118,7 +118,7 @@ type MachineLoadBalancersSpec struct {
 }
 
 type MachineMemoryExtensionsSpec struct {
-	// +kubebuilder:validation:Pattern=^-\\d+$
+	// +kubebuilder:validation:Pattern="^-[0-9]+$"
 	Reserved string `json:"reserved,omitempty"`
 }
 

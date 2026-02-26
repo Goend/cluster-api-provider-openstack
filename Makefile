@@ -428,6 +428,10 @@ docker-push: ## Push the docker image
 .PHONY: docker-build-all ## Build all the architecture docker images
 docker-build-all: $(addprefix docker-build-,$(ALL_ARCH))
 
+.PHONY: docker-build-ansible-local
+docker-build-ansible-local: ## Build ansible images tagged for hub.easystack.cn/test with a minute timestamp
+	$(MAKE) CONTROLLER_IMG_TAG=hub.easystack.cn/test/capi-openstack-controller:$$(date +%Y%m%d%H%M) docker-build
+
 docker-build-%:
 	$(MAKE) ARCH=$* docker-build
 

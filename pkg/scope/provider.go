@@ -226,7 +226,7 @@ func (s *providerScope) NewIdentityClient() (*gophercloud.ServiceClient, error) 
 func (s *providerScope) ServiceEndpoint(service string) (string, error) {
 	endpointOpts := gophercloud.EndpointOpts{
 		Region:       s.providerClientOpts.RegionName,
-		Availability: clientconfig.GetEndpointType(s.providerClientOpts.EndpointType),
+		Availability: gophercloud.AvailabilityPublic,
 	}
 	switch service {
 	case "keystone":
