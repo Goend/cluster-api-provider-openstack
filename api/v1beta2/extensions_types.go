@@ -1,6 +1,7 @@
-package v1beta1
+package v1beta2
 
 // SecretKeyReference extends SecretReference with an optional data key.
+// Note: kept here for parity with v1beta1; not currently referenced from v1beta2 types.
 type SecretKeyReference struct {
 	Name        string `json:"name,omitempty"`
 	Namespace   string `json:"namespace,omitempty"`
@@ -32,8 +33,7 @@ type ClusterNetworkInterfacesExtensionsSpec struct {
 	Flannel string `json:"flannel,omitempty"`
 }
 
-type ClusterOpenStackExtensionsSpec struct {
-}
+type ClusterOpenStackExtensionsSpec struct{}
 
 // OpenStackClusterExtensionsStatus surfaces infra-derived facts for bootstrap/ACP.
 type OpenStackClusterExtensionsStatus struct {
@@ -123,5 +123,4 @@ type MachineMemoryExtensionsSpec struct {
 }
 
 // OpenStackMachineExtensionsStatus surfaces infra-derived machine data.
-type OpenStackMachineExtensionsStatus struct {
-}
+type OpenStackMachineExtensionsStatus struct{}

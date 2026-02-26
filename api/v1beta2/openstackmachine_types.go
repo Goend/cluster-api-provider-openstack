@@ -167,7 +167,11 @@ type OpenStackMachineSpec struct {
 	// +optional
 	// +listType=map
 	// +listMapKey=name
-	SchedulerHintAdditionalProperties []SchedulerHintAdditionalProperty `json:"schedulerHintAdditionalProperties,omitempty"`
+    SchedulerHintAdditionalProperties []SchedulerHintAdditionalProperty `json:"schedulerHintAdditionalProperties,omitempty"`
+
+    // Extensions stores machine-scoped knobs for bootstrap/control-plane integrations.
+    // +optional
+    Extensions *OpenStackMachineExtensionsSpec `json:"extensions,omitempty"`
 }
 
 type ServerMetadata struct {
@@ -223,7 +227,11 @@ type OpenStackMachineStatus struct {
 	// The Ready condition must surface issues during the entire lifecycle of the OpenStackMachine
 	// (both during initial provisioning and after the initial provisioning is completed).
 	// +optional
-	Conditions []metav1.Condition `json:"conditions,omitempty"`
+    Conditions []metav1.Condition `json:"conditions,omitempty"`
+
+    // Extensions surfaces provider-specific machine facts for bootstrap/control-plane integrations.
+    // +optional
+    Extensions *OpenStackMachineExtensionsStatus `json:"extensions,omitempty"`
 }
 
 // +genclient

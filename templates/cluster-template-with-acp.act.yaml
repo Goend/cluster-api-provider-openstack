@@ -12,13 +12,62 @@ apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
 kind: Config
 metadata:
   name: mj-vars-business
-data: {}
+data:
+  kube_service_addresses: "10.96.0.0/12"
+  ecms_domain_custom: "prometheus.hxk8s1.hf2023es2.psbc.cn"
+  prometheus_retention_time: "7d"
+  prometheus_pv_size: "1024"
+  thanos_ruler_pv_size: "200"
+  harbor_domain: "harbor.hxk8s1.hf2023es2.psbc.cn"
+  harbor_admin_password: "cY4EMha0EIpDA2cW"
+  registry_pvc_size: 3072Gi
+  chartmuseum_pvc_size: "100Gi"
+  jobservice_pvc_size: "100Gi"
+  database_pvc_size: "100Gi"
+  redis_pvc_size: "100Gi"
+  volume_type: "hdd"
+  nvidia_accelerator_enabled: false
+  hygon_accelerator_enabled: false
+  webhook_enabled: true
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
 kind: Config
 metadata:
   name: mj-vars-fixed
-data: {}
+data:
+  charts_repo_ip: "10.222.255.253"
+  fs_server: "10.20.0.2"
+  fs_server_ip: ""
+  yum_repo_ip: "172.37.0.176"
+  registry_ip: "172.37.0.176"
+  registry_prefix: "hub.easystack.io"
+  repo_prefix: "repo.easystack.io"
+  registry_admin_name: "admin"
+  registry_admin_password: "2JoyURBK1PsZApZu"
+  etcd_data_dir: "/etcd"
+  data_dir: "/etcd"
+  containerd_lib_path: "/runtime"
+  kubelet_root: "/kubelet"
+  ecms_domain_custom_enabled: true
+  harbor_port: 9443
+  harbor_core_replicas: 1
+  harbor_registry_replicas: 1
+  cloud_provider: "external"
+  psbc_log_dump_enable: true
+  upstream_nameservers: ""
+  webhook_enabled: true
+  helm_enabled: true
+  dnscache_enabled: true
+  kubepods_reserve: true
+  epel_enabled: false
+  docker_repo_enabled: false
+  kubeadm_enabled: false
+  populate_inventory_to_hosts_file: false
+  preinstall_selinux_state: "disabled"
+  container_lvm_enabled: false
+  prometheus_operator_enabled: true
+  nvidia_driver_install_container: false
+  grafana_enabled: true
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -49,13 +98,13 @@ spec:
         fixed:
           name: mj-vars-fixed
       clusterTemplate:
-        apiVersion: cluster.kubean.io/v1alpha1
+        apiVersion: kubean.io/v1alpha1
         kind: Cluster
       clusterOperationTemplate:
-        apiVersion: clusterops.kubean.io/v1alpha1
+        apiVersion: kubean.io/v1alpha1
         kind: ClusterOperation
         spec:
-          image: hub.easystack.cn/captain/launcher-captain:dev
+          image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev1732
           actionType: playbook
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
@@ -83,13 +132,13 @@ spec:
       fixed:
         name: mj-vars-fixed
     clusterTemplate:
-      apiVersion: cluster.kubean.io/v1alpha1
+      apiVersion: kubean.io/v1alpha1
       kind: Cluster
     clusterOperationTemplate:
-      apiVersion: clusterops.kubean.io/v1alpha1
+      apiVersion: kubean.io/v1alpha1
       kind: ClusterOperation
       spec:
-        image: hub.easystack.cn/captain/launcher-captain:dev
+        image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev1732
         actionType: playbook
 ---
 apiVersion: cluster.x-k8s.io/v1beta2
@@ -111,7 +160,7 @@ spec:
     kind: OpenStackCluster
     name: mj
 ---
-apiVersion: cluster.x-k8s.io/v1beta2
+apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachineDeployment
 metadata:
   name: mj-md-0
@@ -124,13 +173,13 @@ spec:
     spec:
       bootstrap:
         configRef:
-          apiGroup: bootstrap.cluster.x-k8s.io
+          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1
           kind: AnsibleConfigTemplate
           name: mj-md-0
       clusterName: mj
       failureDomain: default-az
       infrastructureRef:
-        apiGroup: infrastructure.cluster.x-k8s.io
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: OpenStackMachineTemplate
         name: mj-md-0
       version: v1.26.4-es
@@ -182,12 +231,17 @@ metadata:
 spec:
   template:
     spec:
-      flavor: 4c8G
+      flavor: 16C-16G
       image:
         filter:
-          name: eks-kylin-x86_64-150G.raw
+          name: KyLinV10SP3-X86-20250812
       sshKeyName: mj
+      rootVolume:
+        sizeGiB: 150
+        type: hdd
       extensions:
+        memory:
+          reserved: "-4"
         networkInterfaces:
           keepalived: eth0
         loadBalancers:
@@ -201,14 +255,18 @@ metadata:
 spec:
   template:
     spec:
-      flavor: 4c8G
+      flavor: 16C-16G
       image:
         filter:
-          name: eks-kylin-x86_64-150G.raw
+          name: KyLinV10SP3-X86-20250812
       sshKeyName: mj
+      rootVolume:
+        sizeGiB: 150
+        type: hdd
       extensions:
+        memory:
+          reserved: "-4"
         networkInterfaces:
           keepalived: eth0
-      extensions:
         loadBalancers:
           ingressVIP: true
