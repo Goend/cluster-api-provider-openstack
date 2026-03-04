@@ -28,7 +28,6 @@ data:
   volume_type: "hdd"
   nvidia_accelerator_enabled: false
   hygon_accelerator_enabled: false
-  webhook_enabled: true
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
 kind: Config
@@ -38,8 +37,8 @@ data:
   charts_repo_ip: "10.222.255.253"
   fs_server: "10.20.0.2"
   fs_server_ip: ""
-  yum_repo_ip: "172.37.0.176"
-  registry_ip: "172.37.0.176"
+  yum_repo_ip: "172.37.0.109"
+  registry_ip: "172.37.0.109"
   registry_prefix: "hub.easystack.io"
   repo_prefix: "repo.easystack.io"
   registry_admin_name: "admin"
@@ -55,7 +54,6 @@ data:
   cloud_provider: "external"
   psbc_log_dump_enable: true
   upstream_nameservers: ""
-  webhook_enabled: true
   helm_enabled: true
   dnscache_enabled: true
   kubepods_reserve: true
@@ -68,6 +66,10 @@ data:
   prometheus_operator_enabled: true
   nvidia_driver_install_container: false
   grafana_enabled: true
+  vpc_cni_webhook_enable: true
+  ntp_server: "172.37.0.109"
+  containerd_bin_dir: /usr/local/bin
+  webhook_enabled: false
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -104,7 +106,7 @@ spec:
         apiVersion: kubean.io/v1alpha1
         kind: ClusterOperation
         spec:
-          image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev1732
+          image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev1121
           actionType: playbook
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
@@ -113,7 +115,7 @@ metadata:
   name: mj-control-plane
 spec:
   replicas: 1
-  version: v1.26.4-es
+  version: v1.31.8-es
   machineTemplate:
     spec:
       clusterName: mj
@@ -138,7 +140,7 @@ spec:
       apiVersion: kubean.io/v1alpha1
       kind: ClusterOperation
       spec:
-        image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev1732
+        image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev1121
         actionType: playbook
 ---
 apiVersion: cluster.x-k8s.io/v1beta2
@@ -182,13 +184,25 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: OpenStackMachineTemplate
         name: mj-md-0
-      version: v1.26.4-es
+      version: v1.31.8-es
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackCluster
 metadata:
   name: mj
 spec:
+  # Enable bastion (jump host) for SSH access
+  bastion:
+    enabled: true
+    spec:
+      flavor: 16C-16G
+      image:
+        filter:
+          name: eks-kylin-x86_64_1.20
+      sshKeyName: mj
+      rootVolume:
+        sizeGiB: 200
+        type: hdd
   apiServerLoadBalancer:
     enabled: true
   extensions:
@@ -234,10 +248,10 @@ spec:
       flavor: 16C-16G
       image:
         filter:
-          name: KyLinV10SP3-X86-20250812
+          name: eks-kylin-x86_64_1.20
       sshKeyName: mj
       rootVolume:
-        sizeGiB: 150
+        sizeGiB: 200
         type: hdd
       extensions:
         memory:
@@ -258,10 +272,10 @@ spec:
       flavor: 16C-16G
       image:
         filter:
-          name: KyLinV10SP3-X86-20250812
+          name: eks-kylin-x86_64_1.20
       sshKeyName: mj
       rootVolume:
-        sizeGiB: 150
+        sizeGiB: 200
         type: hdd
       extensions:
         memory:
