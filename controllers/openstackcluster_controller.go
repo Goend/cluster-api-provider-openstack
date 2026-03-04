@@ -532,13 +532,21 @@ func (r *OpenStackClusterReconciler) reconcileBastionServer(ctx context.Context,
 	if err != nil {
 		return nil, true, err
 	}
-	if !bastionNotFound && server != nil && !apiequality.Semantic.DeepEqual(bastionServerSpec, &server.Spec) {
-		scope.Logger().Info("Bastion spec has changed, re-creating the OpenStackServer object")
-		if err := r.deleteBastion(ctx, scope, cluster, openStackCluster); err != nil {
-			return nil, true, err
-		}
-		return nil, true, nil
-	}
+    // Compare desired vs current spec, but ignore UserDataRef because it may be injected internally
+    // (e.g., cloud-init hack for bastion) and should not trigger a recreate.
+    if !bastionNotFound && server != nil {
+        desired := *bastionServerSpec
+        current := server.Spec
+        desired.UserDataRef = nil
+        current.UserDataRef = nil
+        if !apiequality.Semantic.DeepEqual(&desired, &current) {
+            scope.Logger().Info("Bastion spec has changed, re-creating the OpenStackServer object")
+            if err := r.deleteBastion(ctx, scope, cluster, openStackCluster); err != nil {
+                return nil, true, err
+            }
+            return nil, true, nil
+        }
+    }
 
 	// If the bastion is not found, we need to create it.
 	if bastionNotFound {
@@ -577,15 +585,19 @@ func (r *OpenStackClusterReconciler) getBastionServer(ctx context.Context, openS
 // createBastionServer creates the OpenStackServer object for the bastion server.
 // It returns the OpenStackServer object and an error if any.
 func (r *OpenStackClusterReconciler) createBastionServer(ctx context.Context, openStackCluster *infrav1.OpenStackCluster, cluster *clusterv1.Cluster) (*infrav1alpha1.OpenStackServer, error) {
-	bastionServerSpec, err := bastionToOpenStackServerSpec(openStackCluster)
-	if err != nil {
-		return nil, err
-	}
-	bastionServer := &infrav1alpha1.OpenStackServer{
-		ObjectMeta: metav1.ObjectMeta{
-			Labels: map[string]string{
-				clusterv1.ClusterNameLabel: openStackCluster.Labels[clusterv1.ClusterNameLabel],
-			},
+    bastionServerSpec, err := bastionToOpenStackServerSpec(openStackCluster)
+    if err != nil {
+        return nil, err
+    }
+    // Ensure bastion cloud-init user data is present and attach it.
+    if ref, uerr := r.ensureBastionCloudInit(ctx, cluster, openStackCluster); uerr == nil && ref != nil {
+        bastionServerSpec.UserDataRef = ref
+    }
+    bastionServer := &infrav1alpha1.OpenStackServer{
+        ObjectMeta: metav1.ObjectMeta{
+            Labels: map[string]string{
+                clusterv1.ClusterNameLabel: openStackCluster.Labels[clusterv1.ClusterNameLabel],
+            },
 			Name:      bastionName(cluster.Name),
 			Namespace: openStackCluster.Namespace,
 			OwnerReferences: []metav1.OwnerReference{

@@ -9,6 +9,13 @@ import (
 	"strings"
 	"text/template"
 
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
+
+	"golang.org/x/crypto/ssh"
+
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/applicationcredentials"
 	"github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 	corev1 "k8s.io/api/core/v1"
@@ -289,22 +296,22 @@ func (r *OpenStackClusterReconciler) reconcileClusterAppCredential(ctx context.C
 		Name:      secretName,
 		Namespace: osc.Namespace,
 	}
-    if err := r.Client.Get(ctx, secretKey, secret); err == nil {
-        // 确保已有 Secret 也带上集群标签，便于 bootstrap 侧的 SecretCachingClient 缓存命中。
-        if secret.Labels == nil {
-            secret.Labels = map[string]string{}
-        }
-        if secret.Labels[clusterv1.ClusterNameLabel] != cluster.Name {
-            secret.Labels[clusterv1.ClusterNameLabel] = cluster.Name
-            if uerr := r.Client.Update(ctx, secret); uerr != nil {
-                return uerr
-            }
-        }
-        ext.OpenStack.AppCredential.Ref = secretName
-        return nil
-    } else if !apierrors.IsNotFound(err) {
-        return err
-    }
+	if err := r.Client.Get(ctx, secretKey, secret); err == nil {
+		// 确保已有 Secret 也带上集群标签，便于 bootstrap 侧的 SecretCachingClient 缓存命中。
+		if secret.Labels == nil {
+			secret.Labels = map[string]string{}
+		}
+		if secret.Labels[clusterv1.ClusterNameLabel] != cluster.Name {
+			secret.Labels[clusterv1.ClusterNameLabel] = cluster.Name
+			if uerr := r.Client.Update(ctx, secret); uerr != nil {
+				return uerr
+			}
+		}
+		ext.OpenStack.AppCredential.Ref = secretName
+		return nil
+	} else if !apierrors.IsNotFound(err) {
+		return err
+	}
 
 	identityClient, err := scope1.NewIdentityClient()
 	if err != nil {
@@ -338,9 +345,14 @@ func (r *OpenStackClusterReconciler) reconcileClusterAppCredential(ctx context.C
 		return fmt.Errorf("create application credential: %w", err)
 	}
 
+	// Prefer Keystone admin endpoint for app credential auth_url if available.
+	adminURL, _ := scope1.ServiceEndpoint("keystone")
+	if adminURL == "" {
+		adminURL = scope1.IdentityEndpoint()
+	}
 	auth := authConfig{
 		ClusterName:   names.ClusterResourceName(cluster),
-		AuthURL:       scope1.IdentityEndpoint(),
+		AuthURL:       adminURL,
 		AppCredID:     appCred.ID,
 		AppCredSecret: appCred.Secret,
 		Region:        scope1.RegionName(),
@@ -358,18 +370,18 @@ func (r *OpenStackClusterReconciler) reconcileClusterAppCredential(ctx context.C
 		"clouds.yaml": buf.Bytes(),
 		"cacert":      []byte("\n"),
 	}
-    secret = &corev1.Secret{
-        ObjectMeta: metav1.ObjectMeta{
-            Name:      secretName,
-            Namespace: osc.Namespace,
-            Labels: map[string]string{
-                "creId": appCred.ID,
-                // 添加 CAPI 集群名标签，供 bootstrap-ansible 的 Secret 缓存选择器使用。
-                clusterv1.ClusterNameLabel: cluster.Name,
-            },
-        },
-        Data: secretData,
-    }
+	secret = &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      secretName,
+			Namespace: osc.Namespace,
+			Labels: map[string]string{
+				"creId": appCred.ID,
+				// 添加 CAPI 集群名标签，供 bootstrap-ansible 的 Secret 缓存选择器使用。
+				clusterv1.ClusterNameLabel: cluster.Name,
+			},
+		},
+		Data: secretData,
+	}
 	if err := r.Client.Create(ctx, secret); err != nil {
 		if apierrors.IsAlreadyExists(err) {
 			ext.OpenStack.AppCredential.Ref = secretName
@@ -394,6 +406,177 @@ func extractEndpointHost(endpoint string) string {
 		return parsed.Hostname()
 	}
 	return parsed.Host
+}
+
+// ensureBastionCloudInit ensures a Secret with bastion cloud-init exists and returns a reference to it.
+// Cloud-init content enables SSH TCP forwarding on the bastion.
+func (r *OpenStackClusterReconciler) ensureBastionCloudInit(ctx context.Context, cluster *clusterv1.Cluster, osc *infrav1.OpenStackCluster) (*corev1.LocalObjectReference, error) {
+	if cluster == nil || osc == nil {
+		return nil, nil
+	}
+
+	// 1) Ensure <cluster-name>-ssh-auth exists (compatible with CAPI Ansible provider) and derive public key
+	sshSecretName := fmt.Sprintf("%s-ssh-auth", cluster.Name)
+	sshSecretKey := types.NamespacedName{Namespace: osc.Namespace, Name: sshSecretName}
+	sshSecret := &corev1.Secret{}
+	var privateKeyPEM []byte
+	if err := r.Client.Get(ctx, sshSecretKey, sshSecret); err != nil {
+		if !apierrors.IsNotFound(err) {
+			return nil, err
+		}
+		// Generate a new RSA key pair
+		key, err := rsa.GenerateKey(rand.Reader, 2048)
+		if err != nil {
+			return nil, fmt.Errorf("generate SSH key: %w", err)
+		}
+		keyDER := x509.MarshalPKCS1PrivateKey(key)
+		privateKeyPEM = pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: keyDER})
+
+		sshSecret = &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      sshSecretName,
+				Namespace: osc.Namespace,
+				Labels: map[string]string{
+					clusterv1.ClusterNameLabel: cluster.Name,
+				},
+			},
+			Type: corev1.SecretTypeSSHAuth,
+			Data: map[string][]byte{
+				corev1.SSHAuthPrivateKey: privateKeyPEM,
+			},
+		}
+		if err := r.Client.Create(ctx, sshSecret); err != nil && !apierrors.IsAlreadyExists(err) {
+			return nil, err
+		}
+		if apierrors.IsAlreadyExists(err) {
+			// Rare race: fetch again if created elsewhere
+			if err := r.Client.Get(ctx, sshSecretKey, sshSecret); err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		// Use existing private key
+		if v, ok := sshSecret.Data[corev1.SSHAuthPrivateKey]; ok && len(v) > 0 {
+			privateKeyPEM = v
+		} else {
+			// Populate if missing
+			key, err := rsa.GenerateKey(rand.Reader, 2048)
+			if err != nil {
+				return nil, fmt.Errorf("generate SSH key: %w", err)
+			}
+			keyDER := x509.MarshalPKCS1PrivateKey(key)
+			privateKeyPEM = pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: keyDER})
+			if sshSecret.Data == nil {
+				sshSecret.Data = map[string][]byte{}
+			}
+			sshSecret.Data[corev1.SSHAuthPrivateKey] = privateKeyPEM
+			if err := r.Client.Update(ctx, sshSecret); err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	// Derive public key from private key
+	signer, err := ssh.ParsePrivateKey(privateKeyPEM)
+	if err != nil {
+		return nil, fmt.Errorf("parse SSH private key: %w", err)
+	}
+	pubKey := ssh.MarshalAuthorizedKey(signer.PublicKey())
+	if len(pubKey) == 0 || pubKey[len(pubKey)-1] != '\n' {
+		pubKey = append(pubKey, '\n')
+	}
+
+	secretName := fmt.Sprintf("%s-bastion-user-data", names.ClusterResourceName(cluster))
+	key := types.NamespacedName{Namespace: osc.Namespace, Name: secretName}
+
+	// If already present, ensure labels/owner and reuse it.
+	existing := &corev1.Secret{}
+	if err := r.Client.Get(ctx, key, existing); err == nil {
+		needUpdate := false
+		if existing.Labels == nil {
+			existing.Labels = map[string]string{}
+		}
+		if existing.Labels[clusterv1.ClusterNameLabel] != cluster.Name {
+			existing.Labels[clusterv1.ClusterNameLabel] = cluster.Name
+			needUpdate = true
+		}
+		// Ensure owner reference to OpenStackCluster so the Secret is garbage-collected on cluster delete.
+		owner := metav1.OwnerReference{
+			APIVersion: osc.APIVersion,
+			Kind:       osc.Kind,
+			Name:       osc.Name,
+			UID:        osc.UID,
+			Controller: ptr.To(true),
+		}
+		hasOwner := false
+		for _, or := range existing.OwnerReferences {
+			if or.UID == osc.UID {
+				hasOwner = true
+				break
+			}
+		}
+		if !hasOwner {
+			existing.OwnerReferences = append(existing.OwnerReferences, owner)
+			needUpdate = true
+		}
+		if needUpdate {
+			if uerr := r.Client.Update(ctx, existing); uerr != nil {
+				return nil, uerr
+			}
+		}
+		return &corev1.LocalObjectReference{Name: secretName}, nil
+	} else if !apierrors.IsNotFound(err) {
+		return nil, err
+	}
+
+	// Compose cloud-config with authorized_keys and robust ssh reload.
+	cloudInit := fmt.Sprintf(`## template: jinja
+#cloud-config
+
+write_files:
+  - path: /root/.ssh/authorized_keys
+    permissions: '0600'
+    owner: root:root
+    append: true
+    content: |
+      %s
+
+runcmd:
+  - sed -i 's/^#\?AllowTcpForwarding.*/AllowTcpForwarding yes/' /etc/ssh/sshd_config
+  - sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin prohibit-password/' /etc/ssh/sshd_config
+  - service sshd restart
+`, strings.TrimRight(string(pubKey), "\n"))
+
+	secret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      secretName,
+			Namespace: osc.Namespace,
+			Labels: map[string]string{
+				clusterv1.ClusterNameLabel: cluster.Name,
+			},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: osc.APIVersion,
+					Kind:       osc.Kind,
+					Name:       osc.Name,
+					UID:        osc.UID,
+					Controller: ptr.To(true),
+				},
+			},
+		},
+		Data: map[string][]byte{
+			// OpenStackServer controller expects the key "value".
+			"value": []byte(cloudInit),
+		},
+		Type: corev1.SecretTypeOpaque,
+	}
+	if err := r.Client.Create(ctx, secret); err != nil {
+		if apierrors.IsAlreadyExists(err) {
+			return &corev1.LocalObjectReference{Name: secretName}, nil
+		}
+		return nil, err
+	}
+	return &corev1.LocalObjectReference{Name: secretName}, nil
 }
 
 type keepalivedPortInput struct {

@@ -25,10 +25,10 @@ const (
 )
 
 type vpcCniWarmupConfig struct {
-	NetworkName     string
-	SubnetCIDR      string
-	RouterID        string
-	Tags            []string
+	NetworkName string
+	SubnetCIDR  string
+	RouterID    string
+	Tags        []string
 }
 
 type vpcCniResources struct {
