@@ -106,7 +106,7 @@ spec:
         apiVersion: kubean.io/v1alpha1
         kind: ClusterOperation
         spec:
-          image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev1121
+          image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev03091344
           actionType: playbook
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
@@ -140,7 +140,7 @@ spec:
       apiVersion: kubean.io/v1alpha1
       kind: ClusterOperation
       spec:
-        image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev1121
+        image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev03091344
         actionType: playbook
 ---
 apiVersion: cluster.x-k8s.io/v1beta2
@@ -162,26 +162,26 @@ spec:
     kind: OpenStackCluster
     name: mj
 ---
-apiVersion: cluster.x-k8s.io/v1beta1
+apiVersion: cluster.x-k8s.io/v1beta2
 kind: MachineDeployment
 metadata:
   name: mj-md-0
 spec:
   clusterName: mj
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels: null
   template:
     spec:
       bootstrap:
         configRef:
-          apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1
+          apiGroup: bootstrap.cluster.x-k8s.io
           kind: AnsibleConfigTemplate
           name: mj-md-0
       clusterName: mj
       failureDomain: default-az
       infrastructureRef:
-        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        apiGroup: infrastructure.cluster.x-k8s.io
         kind: OpenStackMachineTemplate
         name: mj-md-0
       version: v1.31.8-es
@@ -257,7 +257,7 @@ spec:
         memory:
           reserved: "-4"
         networkInterfaces:
-          keepalived: eth0
+          keepalived: ens3
         loadBalancers:
           controlPlaneVIP: true
 
@@ -281,6 +281,6 @@ spec:
         memory:
           reserved: "-4"
         networkInterfaces:
-          keepalived: eth0
+          keepalived: ens3
         loadBalancers:
           ingressVIP: true
