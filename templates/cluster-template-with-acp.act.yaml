@@ -88,6 +88,78 @@ data:
 apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1
 kind: AnsibleConfigTemplate
 metadata:
+  name: mj-prometheus-0
+spec:
+  template:
+    spec:
+      role:
+        - prometheus
+      varsConfigRefs:
+        business:
+          name: mj-vars-business
+        fixed:
+          name: mj-vars-fixed
+      clusterTemplate:
+        apiVersion: kubean.io/v1alpha1
+        kind: Cluster
+      clusterOperationTemplate:
+        apiVersion: kubean.io/v1alpha1
+        kind: ClusterOperation
+        spec:
+          image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev03161228
+          actionType: playbook
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1
+kind: AnsibleConfigTemplate
+metadata:
+  name: mj-harbor-0
+spec:
+  template:
+    spec:
+      role:
+        - harbor
+      varsConfigRefs:
+        business:
+          name: mj-vars-business
+        fixed:
+          name: mj-vars-fixed
+      clusterTemplate:
+        apiVersion: kubean.io/v1alpha1
+        kind: Cluster
+      clusterOperationTemplate:
+        apiVersion: kubean.io/v1alpha1
+        kind: ClusterOperation
+        spec:
+          image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev03161228
+          actionType: playbook
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1
+kind: AnsibleConfigTemplate
+metadata:
+  name: mj-ingress-0
+spec:
+  template:
+    spec:
+      role:
+        - ingress
+      varsConfigRefs:
+        business:
+          name: mj-vars-business
+        fixed:
+          name: mj-vars-fixed
+      clusterTemplate:
+        apiVersion: kubean.io/v1alpha1
+        kind: Cluster
+      clusterOperationTemplate:
+        apiVersion: kubean.io/v1alpha1
+        kind: ClusterOperation
+        spec:
+          image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev03161228
+          actionType: playbook
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1alpha1
+kind: AnsibleConfigTemplate
+metadata:
   name: mj-md-0
 spec:
   template:
@@ -106,7 +178,7 @@ spec:
         apiVersion: kubean.io/v1alpha1
         kind: ClusterOperation
         spec:
-          image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev03091344
+          image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev03161228
           actionType: playbook
 ---
 apiVersion: controlplane.cluster.x-k8s.io/v1alpha1
@@ -114,7 +186,7 @@ kind: AnsibleControlPlane
 metadata:
   name: mj-control-plane
 spec:
-  replicas: 1
+  replicas: 3
   version: v1.31.8-es
   machineTemplate:
     spec:
@@ -140,7 +212,7 @@ spec:
       apiVersion: kubean.io/v1alpha1
       kind: ClusterOperation
       spec:
-        image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev03091344
+        image: hub.easystack.cn/captain/escloud-linux-source-spray-job:dev03161228
         actionType: playbook
 ---
 apiVersion: cluster.x-k8s.io/v1beta2
@@ -165,10 +237,82 @@ spec:
 apiVersion: cluster.x-k8s.io/v1beta2
 kind: MachineDeployment
 metadata:
+  name: mj-prometheus-0
+spec:
+  clusterName: mj
+  replicas: 3
+  selector:
+    matchLabels: null
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiGroup: bootstrap.cluster.x-k8s.io
+          kind: AnsibleConfigTemplate
+          name: mj-prometheus-0
+      clusterName: mj
+      failureDomain: default-az
+      infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
+        kind: OpenStackMachineTemplate
+        name: mj-prometheus-0
+      version: v1.31.8-es
+---
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: MachineDeployment
+metadata:
+  name: mj-harbor-0
+spec:
+  clusterName: mj
+  replicas: 3
+  selector:
+    matchLabels: null
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiGroup: bootstrap.cluster.x-k8s.io
+          kind: AnsibleConfigTemplate
+          name: mj-harbor-0
+      clusterName: mj
+      failureDomain: default-az
+      infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
+        kind: OpenStackMachineTemplate
+        name: mj-harbor-0
+      version: v1.31.8-es
+---
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: MachineDeployment
+metadata:
+  name: mj-ingress-0
+spec:
+  clusterName: mj
+  replicas: 3
+  selector:
+    matchLabels: null
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiGroup: bootstrap.cluster.x-k8s.io
+          kind: AnsibleConfigTemplate
+          name: mj-ingress-0
+      clusterName: mj
+      failureDomain: default-az
+      infrastructureRef:
+        apiGroup: infrastructure.cluster.x-k8s.io
+        kind: OpenStackMachineTemplate
+        name: mj-ingress-0
+      version: v1.31.8-es
+---
+apiVersion: cluster.x-k8s.io/v1beta2
+kind: MachineDeployment
+metadata:
   name: mj-md-0
 spec:
   clusterName: mj
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels: null
   template:
@@ -260,7 +404,75 @@ spec:
           keepalived: ens3
         loadBalancers:
           controlPlaneVIP: true
-
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: mj-prometheus-0
+spec:
+  template:
+    spec:
+      flavor: 16C-16G
+      image:
+        filter:
+          name: eks-kylin-x86_64_1.20
+      sshKeyName: mj
+      rootVolume:
+        sizeGiB: 200
+        type: hdd
+      extensions:
+        memory:
+          reserved: "-4"
+        networkInterfaces:
+          keepalived: ens3
+        loadBalancers:
+          ingressVIP: true
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: mj-harbor-0
+spec:
+  template:
+    spec:
+      flavor: 16C-16G
+      image:
+        filter:
+          name: eks-kylin-x86_64_1.20
+      sshKeyName: mj
+      rootVolume:
+        sizeGiB: 200
+        type: hdd
+      extensions:
+        memory:
+          reserved: "-4"
+        networkInterfaces:
+          keepalived: ens3
+        loadBalancers:
+          ingressVIP: true
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: OpenStackMachineTemplate
+metadata:
+  name: mj-ingress-0
+spec:
+  template:
+    spec:
+      flavor: 16C-16G
+      image:
+        filter:
+          name: eks-kylin-x86_64_1.20
+      sshKeyName: mj
+      rootVolume:
+        sizeGiB: 200
+        type: hdd
+      extensions:
+        memory:
+          reserved: "-4"
+        networkInterfaces:
+          keepalived: ens3
+        loadBalancers:
+          ingressVIP: true
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: OpenStackMachineTemplate
